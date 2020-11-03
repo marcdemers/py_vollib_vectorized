@@ -1,7 +1,7 @@
 from numba import jit
 
 
-use_jit = True
+use_jit = False
 force_nopython = True
 
 def maybe_jit(*jit_args, **jit_kwargs):

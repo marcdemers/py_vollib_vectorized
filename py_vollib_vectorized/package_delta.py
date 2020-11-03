@@ -142,27 +142,20 @@ def normalised_black_call(x, s):
     if x < s * asymptotic_expansion_accuracy_threshold and 0.5 * s * s + x < s * (
             small_t_expansion_of_normalized_black_threshold + asymptotic_expansion_accuracy_threshold):
         # Region 1.
-        print("REGION 1")
         return _asymptotic_expansion_of_normalized_black_call(x / s, 0.5 * s)
     if 0.5 * s < small_t_expansion_of_normalized_black_threshold:
         # Region 2.
-        print("REGION 2")
-
         return _small_t_expansion_of_normalized_black_call(x / s, 0.5 * s)
     # When b is more than, say, about 85% of b_max=exp(x/2), then b is dominated by the first of the two terms in the
     #  Black formula, and we retain more accuracy by not attempting to combine the two terms in any way. We evaluate
     # the condition h+t>0.85  avoiding any divisions by s.
     if x + 0.5 * s * s > s * 0.85:
         # Region 3.
-        print("REGION 3")
-
         return _normalized_black_call_using_norm_cdf(x, s)
     # Region 4.
-    print("REGION 4")
     return _normalised_black_call_using_erfcx(x / s, 0.5 * s)
 
 
-# @njit(cache=True)
 @maybe_jit()
 def normalised_black(x, s, q) -> float:
     """
@@ -175,12 +168,10 @@ def normalised_black(x, s, q) -> float:
     :return:
     :rtype: float
     """
-    print("here")
     out = normalised_black_call(-x if q < 0 else x, s)  # Reciprocal-strike call-put equivalence
     return out
 
 
-# @njit(cache=True)
 @maybe_jit()
 def undiscounted_black(F, K, sigma, t, flag) -> np.float64:
     """Calculate the **undiscounted** Black option price.

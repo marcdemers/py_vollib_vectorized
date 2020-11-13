@@ -18,7 +18,7 @@ from .jit_helper import maybe_jit
 
 
 @maybe_jit()
-def numerical_delta(flag1, S1, K1, t1, r1, sigma1, b1):
+def numerical_delta_black_scholes(flag1, S1, K1, t1, r1, sigma1, b1):
     """Calculate option delta using numerical integration.
     :param S: underlying asset price
     :type S: float
@@ -65,7 +65,7 @@ def numerical_delta(flag1, S1, K1, t1, r1, sigma1, b1):
 
 
 @maybe_jit()
-def numerical_theta(flag1, S1, K1, t1, r1, sigma1, b1):
+def numerical_theta_black_scholes(flag1, S1, K1, t1, r1, sigma1, b1):
     rets = []
 
     for flag, S, K, t, r, sigma, b in zip(flag1, S1, K1, t1, r1, sigma1, b1):
@@ -82,7 +82,7 @@ def numerical_theta(flag1, S1, K1, t1, r1, sigma1, b1):
 
 
 @maybe_jit()
-def numerical_vega(flag1, S1, K1, t1, r1, sigma1, b1):
+def numerical_vega_black_scholes(flag1, S1, K1, t1, r1, sigma1, b1):
     rets = []
 
     for flag, S, K, t, r, sigma, b in zip(flag1, S1, K1, t1, r1, sigma1, b1):
@@ -94,7 +94,7 @@ def numerical_vega(flag1, S1, K1, t1, r1, sigma1, b1):
 
 #TODO rho has a different b than the rest in the pricing function@maybe_jit()
 @maybe_jit()
-def numerical_rho(flag1, S1, K1, t1, r1, sigma1, b1):
+def numerical_rho_black_scholes(flag1, S1, K1, t1, r1, sigma1, b1):
     rets = []
 
     for flag, S, K, t, r, sigma, b in zip(flag1, S1, K1, t1, r1, sigma1, b1):
@@ -106,7 +106,7 @@ def numerical_rho(flag1, S1, K1, t1, r1, sigma1, b1):
 
 
 @maybe_jit()
-def numerical_gamma(flag1, S1, K1, t1, r1, sigma1, b1):
+def numerical_gamma_black_scholes(flag1, S1, K1, t1, r1, sigma1, b1):
     rets = []
 
     for flag, S, K, t, r, sigma, b in zip(flag1, S1, K1, t1, r1, sigma1, b1):

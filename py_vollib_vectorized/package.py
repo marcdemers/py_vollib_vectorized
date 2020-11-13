@@ -1,11 +1,8 @@
 import numba
-from numba import njit
+from .jit_helper import maybe_jit
 
 import numpy as np
 import py_lets_be_rational
-from py_vollib.helpers import binary_flag
-from py_vollib.helpers.constants import FLOAT_MAX, MINUS_FLOAT_MAX
-from py_vollib.helpers.exceptions import PriceIsAboveMaximum, PriceIsBelowIntrinsic
 
 from py_lets_be_rational.lets_be_rational import DENORMALIZATION_CUTOFF, DBL_MIN, DBL_MAX, \
     normalised_black_call, normalised_vega, DBL_EPSILON, SQRT_DBL_MAX
@@ -13,27 +10,18 @@ from py_lets_be_rational.lets_be_rational import DENORMALIZATION_CUTOFF, DBL_MIN
 implied_volatility_maximum_iterations = 2
 
 
-def implied_volatility_vectorized(price, S, K, t, r, flag, on_error="raise"):
-    S = S.astype(np.float32)
-    K = K.astype(np.float32)
-    t = t.astype(np.float32)
-    r = r.astype(np.float32)
-
-    deflater = np.exp((-r * t))
-    undiscounted_option_price = price / deflater
-    F = forward_price(S, t, r)
-    individual_flags = np.array([binary_flag[f] for f in flag], dtype=np.float32)
-    sigma_calc = implied_volatility_from_a_transformed_rational_guess(undiscounted_option_price, F, K, t,
-                                                                      individual_flags)
-    if np.any(sigma_calc == FLOAT_MAX):
-        raise PriceIsAboveMaximum()
-    elif np.any(sigma_calc == MINUS_FLOAT_MAX):
-        raise PriceIsBelowIntrinsic()
-    return sigma_calc
+def forward_price(S, t, r):
+    """Calculate the forward price of an underlying asset."""
+    return S / np.exp(-r * t)
 
 
+@maybe_jit()
+def implied_volatility_from_a_transformed_rational_guess(price, F, K, T, q):
+    return implied_volatility_from_a_transformed_rational_guess_with_limited_iterations(
+        price, F, K, T, q, implied_volatility_maximum_iterations)
 
-@numba.jit(cache=True, nopython=True)
+
+@maybe_jit()
 def implied_volatility_from_a_transformed_rational_guess_with_limited_iterations(
         PX, FF, KK, TT, qq, N
 ):
@@ -87,18 +75,7 @@ def implied_volatility_from_a_transformed_rational_guess_with_limited_iterations
     return np.array(ret)
 
 
-@njit()
-def implied_volatility_from_a_transformed_rational_guess(price, F, K, T, q):
-    return implied_volatility_from_a_transformed_rational_guess_with_limited_iterations(
-        price, F, K, T, q, implied_volatility_maximum_iterations)
-
-
-def forward_price(S, t, r):
-    """Calculate the forward price of an underlying asset."""
-    return S / np.exp(-r * t)
-
-
-@numba.jit(nopython=True)
+@maybe_jit()
 def _unchecked_normalised_implied_volatility_from_a_transformed_rational_guess_with_limited_iterations(beta, x, q, N):
     """
     See http://en.wikipedia.org/wiki/Householder%27s_method for a detailed explanation of the third order Householder iteration.

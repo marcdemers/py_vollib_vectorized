@@ -1,12 +1,15 @@
 from numba import jit
 
 
-use_jit = False
+use_jit = True
 force_nopython = True
+use_cache = True
 
 def maybe_jit(*jit_args, **jit_kwargs):
     if force_nopython:
         jit_kwargs.update({"nopython": True})
+    if use_cache:
+        jit_kwargs.update({"cache": True})
     def wrapper(fun):
         if use_jit:
             return jit(*jit_args, **jit_kwargs)(fun)

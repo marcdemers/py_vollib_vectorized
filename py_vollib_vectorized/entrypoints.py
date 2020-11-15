@@ -9,7 +9,8 @@ from py_vollib.helpers.exceptions import PriceIsAboveMaximum, PriceIsBelowIntrin
 from .package import implied_volatility_from_a_transformed_rational_guess, forward_price
 from .package_greeks_numerical import numerical_delta_black_scholes, numerical_theta_black_scholes, \
     numerical_vega_black_scholes, numerical_rho_black_scholes, numerical_gamma_black_scholes
-
+from .package_greeks_numerical import numerical_delta_black_scholes_merton, numerical_theta_black_scholes_merton, \
+    numerical_vega_black_scholes_merton, numerical_rho_black_scholes_merton, numerical_gamma_black_scholes_merton
 
 def _preprocess_flags(flags, dtype):
     return np.array([binary_flag[f] for f in flags], dtype=dtype)
@@ -40,7 +41,8 @@ def _validate_data(*all_data):
 
 
 ######## IV
-def implied_volatility_vectorized(price, S, K, t, r, flag, on_error="raise", dtype=np.float64, **kwargs):
+def implied_volatility_vectorized(price, S, K, t, r, flag, q=None, on_error="raise",
+                                  model="black", dtype=np.float64, **kwargs):
     # TODO documentation, should r be annualized, etc.
     flag = _preprocess_flags(flag, dtype)
     price, S, K, t, r = maybe_format_data(price, S, K, t, r, dtype=dtype)
@@ -48,7 +50,14 @@ def implied_volatility_vectorized(price, S, K, t, r, flag, on_error="raise", dty
 
     deflater = np.exp((-r * t))
     undiscounted_option_price = price / deflater
-    F = forward_price(S, t, r)
+    if model == "black_scholes":
+        F = forward_price(S, t, r)
+    elif model == "black_scholes_merton":
+        if q is None:
+            raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
+        F = S * np.exp((r-q) * t)
+    else:
+        raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
     sigma_calc = implied_volatility_from_a_transformed_rational_guess(undiscounted_option_price, F, K, t,
                                                                       flag)
 
@@ -61,13 +70,20 @@ def implied_volatility_vectorized(price, S, K, t, r, flag, on_error="raise", dty
 
 
 ####### GREEKS
-def all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
+def get_all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
     flag = _preprocess_flags(flag, dtype=dtype)
     price, S, K, t, r = maybe_format_data(S, K, t, r, dtype=dtype)
     _validate_data(price, S, K, t, r, flag)
 
     if model == "black":
         b = 0
+        greeks = {
+            "delta": numerical_delta_black_scholes(flag, S, K, t, r, sigma, b),
+            "gamma": numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b),
+            "theta": numerical_theta_black_scholes(flag, S, K, t, r, sigma, b),
+            "rho": numerical_rho_black_scholes(flag, S, K, t, r, sigma, b),
+            "vega": numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
+        }
     elif model == "black_scholes":
         b = r
         greeks = {
@@ -81,6 +97,13 @@ def all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
         b = r - q
+        greeks = {
+            "delta": numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "gamma": numerical_gamma_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "theta": numerical_theta_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "rho": numerical_rho_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "vega": numerical_vega_black_scholes_merton(flag, S, K, t, r, sigma, b)
+        }
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
@@ -114,6 +137,7 @@ def delta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
 
     if model == "black":
         b = 0
+        delta = numerical_delta_black_scholes(flag, S, K, t, r, sigma, b)
     elif model == "black_scholes":
         b = r
         delta = numerical_delta_black_scholes(flag, S, K, t, r, sigma, b)
@@ -121,6 +145,8 @@ def delta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
         b = r - q
+        delta = numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b)
+
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
@@ -153,6 +179,8 @@ def theta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
 
     if model == "black":
         b = 0
+        theta = numerical_theta_black_scholes(flag, S, K, t, r, sigma, b)
+
     elif model == "black_scholes":
         b = r
         theta = numerical_theta_black_scholes(flag, S, K, t, r, sigma, b)
@@ -160,6 +188,8 @@ def theta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
         b = r - q
+        theta = numerical_theta_black_scholes_merton(flag, S, K, t, r, sigma, b)
+
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
@@ -192,6 +222,8 @@ def vega(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="data
 
     if model == "black":
         b = 0
+        vega = numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
+
     elif model == "black_scholes":
         b = r
         vega = numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
@@ -199,6 +231,8 @@ def vega(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="data
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
         b = r - q
+        vega = numerical_vega_black_scholes_merton(flag, S, K, t, r, sigma, b)
+
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
@@ -231,6 +265,8 @@ def rho(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataf
 
     if model == "black":
         b = 0
+        rho = numerical_rho_black_scholes(flag, S, K, t, r, sigma, b)
+
     elif model == "black_scholes":
         b = r
         rho = numerical_rho_black_scholes(flag, S, K, t, r, sigma, b)
@@ -238,6 +274,8 @@ def rho(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataf
         if q is None:  # TODO on each greek add a check for q is in right format
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
         b = r - q
+        rho = numerical_rho_black_scholes_merton(flag, S, K, t, r, sigma, b)
+
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
@@ -269,6 +307,7 @@ def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
 
     if model == "black":
         b = 0
+        gamma = numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b)
     elif model == "black_scholes":
         b = r
         gamma = numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b)
@@ -276,6 +315,8 @@ def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
         b = r - q
+        gamma = numerical_gamma_black_scholes_merton(flag, S, K, t, r, sigma, b)
+
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 

@@ -41,31 +41,75 @@ def _validate_data(*all_data):
 
 
 ######## IV
-def implied_volatility_vectorized(price, S, K, t, r, flag, q=None, on_error="raise",
-                                  model="black", dtype=np.float64, **kwargs):
+def implied_volatility_vectorized_black(price, F, K, r, t, flag, on_error="raise", dtype=np.float64, **kwargs):
+    """ a second iv function is specified to keep consistency w/ original py_vollib argument order"""
     # TODO documentation, should r be annualized, etc.
     flag = _preprocess_flags(flag, dtype)
-    price, S, K, t, r = maybe_format_data(price, S, K, t, r, dtype=dtype)
-    _validate_data(price, S, K, t, r, flag)
+    price, F, K, t, r = maybe_format_data(price, F, K, t, r, dtype=dtype)
+    _validate_data(price, F, K, t, r, flag)
 
-    deflater = np.exp((-r * t))
+    deflater = np.exp(-r * t)
     undiscounted_option_price = price / deflater
-    if model == "black_scholes":
-        F = forward_price(S, t, r)
-    elif model == "black_scholes_merton":
-        if q is None:
-            raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
-        F = S * np.exp((r-q) * t)
-    else:
-        raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
-    sigma_calc = implied_volatility_from_a_transformed_rational_guess(undiscounted_option_price, F, K, t,
-                                                                      flag)
+    sigma_calc = implied_volatility_from_a_transformed_rational_guess(undiscounted_option_price, F, K, t, flag)
 
     # TODO send user warning instead of error, and fix the kwarg on_error
     if np.any(sigma_calc == FLOAT_MAX):
         raise PriceIsAboveMaximum()
     elif np.any(sigma_calc == MINUS_FLOAT_MAX):
         raise PriceIsBelowIntrinsic()
+    return sigma_calc
+
+def implied_volatility_vectorized(price, S, K, t, r, flag, q=None, on_error="raise",
+                                  model="black_scholes", return_as="dataframe",
+                                  dtype=np.float64, **kwargs):
+    """
+    An extremely fast, efficient and accurate Implied Volatility calculator.
+    No broadcasting is done on the inputs.
+    :param price: The price of the option.
+    :param S: The price of the underlying asset.
+    :param K: The strike price.
+    :param t: The annualized time to expiration. Must be positive. For small TTEs, use a small value (1e-3)
+    :param r: The Interest Free Rate.
+    :param flag: For each contract, this should be specified as `c` for a call option and `p` for a put option.
+    :param q: The annualized continuous dividend yield.
+    :param on_error: Either raise, warn or ignore.
+    :param model: Must be one of "black_scholes" or "black_scholes_merton"
+    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use
+    "dataframe". Any other value will return a `numpy.array` object.
+    :param dtype: Data type.
+    :param kwargs: Other keyword arguments are ignored.
+    :return:
+    """
+    # TODO documentation, should r be annualized, etc.
+    flag = _preprocess_flags(flag, dtype)
+    price, S, K, t, r = maybe_format_data(price, S, K, t, r, dtype=dtype)
+    _validate_data(price, S, K, t, r, flag)
+
+    deflater = np.exp(-r * t)
+    undiscounted_option_price = price / deflater
+
+    if model == "black_scholes":
+        F = forward_price(S, t, r)
+    elif model == "black_scholes_merton":
+        if q is None:
+            raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
+        q = maybe_format_data(q, dtype=dtype)
+        _validate_data(r, q)
+        F = S * np.exp((r-q) * t)
+    else:
+        raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
+    sigma_calc = implied_volatility_from_a_transformed_rational_guess(undiscounted_option_price, F, K, t, flag)
+
+    # TODO send user warning instead of error, and fix the kwarg on_error
+    if np.any(sigma_calc == FLOAT_MAX):
+        raise PriceIsAboveMaximum()
+    elif np.any(sigma_calc == MINUS_FLOAT_MAX):
+        raise PriceIsBelowIntrinsic()
+
+    if return_as == "series":
+        return pd.Series(sigma_calc, name="IV")
+    elif return_as == "dataframe":
+        return pd.DataFrame(sigma_calc, columns=["IV"])
     return sigma_calc
 
 
@@ -96,6 +140,8 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", retur
     elif model == "black_scholes_merton":
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
+        q = maybe_format_data(q, dtype=dtype)
+        _validate_data(r, q)
         b = r - q
         greeks = {
             "delta": numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b),
@@ -114,7 +160,6 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", retur
     return greeks
 
 
-# TODO for delta of black-scholes-merton, use another pricing function `f
 def delta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
     """Return Black-Scholes delta of an option.
 
@@ -144,6 +189,8 @@ def delta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     elif model == "black_scholes_merton":
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
+        q = maybe_format_data(q, dtype=dtype)
+        _validate_data(r, q)
         b = r - q
         delta = numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b)
 
@@ -187,6 +234,8 @@ def theta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     elif model == "black_scholes_merton":
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
+        q = maybe_format_data(q, dtype=dtype)
+        _validate_data(r, q)
         b = r - q
         theta = numerical_theta_black_scholes_merton(flag, S, K, t, r, sigma, b)
 
@@ -200,7 +249,6 @@ def theta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     return theta
 
 
-# TODO in all the entrypoint functions, like delta, theta, etc... we need to fix the function problem of black_scoles vs black_schols_merton pricing functions and the `b`parameter
 def vega(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
     """Return Black-Scholes vega of an option.
     :param S: underlying asset price
@@ -231,6 +279,8 @@ def vega(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="data
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
         b = r - q
+        q = maybe_format_data(q, dtype=dtype)
+        _validate_data(r, q)
         vega = numerical_vega_black_scholes_merton(flag, S, K, t, r, sigma, b)
 
     else:
@@ -271,8 +321,10 @@ def rho(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataf
         b = r
         rho = numerical_rho_black_scholes(flag, S, K, t, r, sigma, b)
     elif model == "black_scholes_merton":
-        if q is None:  # TODO on each greek add a check for q is in right format
+        if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
+        q = maybe_format_data(q, dtype=dtype)
+        _validate_data(r, q)
         b = r - q
         rho = numerical_rho_black_scholes_merton(flag, S, K, t, r, sigma, b)
 
@@ -314,6 +366,8 @@ def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     elif model == "black_scholes_merton":
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
+        q = maybe_format_data(q, dtype=dtype)
+        _validate_data(r, q)
         b = r - q
         gamma = numerical_gamma_black_scholes_merton(flag, S, K, t, r, sigma, b)
 

@@ -1,41 +1,67 @@
-from .entrypoints import implied_volatility_vectorized, get_all_greeks, delta as vectorized_delta,\
+try:
+    import py_vollib
+except ImportError:
+    raise ImportError("You must have py_vollib installed to use this library.")
+
+from functools import partial, update_wrapper
+
+from .entrypoints import implied_volatility_vectorized_black, implied_volatility_vectorized
+from .entrypoints import get_all_greeks
+from .entrypoints import delta as vectorized_delta,\
     gamma as vectorized_gamma, rho as vectorized_rho, vega as vectorized_vega, theta as vectorized_theta
 
 #TODO the readme file
 #TODO small test suite
 
+class repr_partial(partial):
+    def __repr__(self):
+        return "Vectorized <{fn}({args}{kwargs})>".format(fn=self.func.__name__,
+                                                           args=", ".join(repr(a) for a in self.args),
+                                                           kwargs=", ".join([str(k) + "=" + str(v) for k, v in self.keywords.items()])
+                                                                       )
 
-from py_vollib.black_scholes.implied_volatility import implied_volatility as orig_implied_volatility
-from py_vollib.black_scholes.greeks.numerical import delta
+# ## apply monkeypatches
 
-import py_vollib
-from functools import partial
+#IVs
+import py_vollib.black.implied_volatility
 
-# monkey-patch py_vollib fn's
-#TODO use functools partial to specify the black vs black scholes vs merton
+py_vollib.black.implied_volatility.implied_volatility = repr_partial(implied_volatility_vectorized_black, model="black")
+update_wrapper(py_vollib.black.implied_volatility.implied_volatility, implied_volatility_vectorized_black)
 
-py_vollib.black_scholes.implied_volatility.implied_volatility = implied_volatility_vectorized
-# orig_implied_volatility = implied_volatility_vectorized
+import py_vollib.black_scholes.implied_volatility
 
+py_vollib.black_scholes.implied_volatility.implied_volatility = repr_partial(implied_volatility_vectorized, model="black_scholes")
+update_wrapper(py_vollib.black_scholes.implied_volatility.implied_volatility, implied_volatility_vectorized)
 
-from .entrypoints import get_all_greeks
+import py_vollib.black_scholes_merton.implied_volatility
 
-py_vollib.black.greeks.numerical.delta = partial(vectorized_delta, model="black")
-py_vollib.black.greeks.numerical.gamma = partial(vectorized_gamma, model="black")
-py_vollib.black.greeks.numerical.rho = partial(vectorized_rho, model="black")
-py_vollib.black.greeks.numerical.theta = partial(vectorized_theta, model="black")
-py_vollib.black.greeks.numerical.vega = partial(vectorized_vega, model="black")
-
-py_vollib.black_scholes.greeks.numerical.delta = partial(vectorized_delta, model="black_scholes")
-py_vollib.black_scholes.greeks.numerical.gamma = partial(vectorized_gamma, model = "black_scholes")
-py_vollib.black_scholes.greeks.numerical.rho = partial(vectorized_rho, model = "black_scholes")
-py_vollib.black_scholes.greeks.numerical.theta = partial(vectorized_theta, model = "black_scholes")
-py_vollib.black_scholes.greeks.numerical.vega = partial(vectorized_vega, model = "black_scholes")
-
-py_vollib.black_scholes_merton.greeks.numerical.delta = partial(vectorized_delta, model="black_scholes_merton")
-py_vollib.black_scholes_merton.greeks.numerical.gamma = partial(vectorized_gamma, model="black_scholes_merton")
-py_vollib.black_scholes_merton.greeks.numerical.rho = partial(vectorized_rho, model="black_scholes_merton")
-py_vollib.black_scholes_merton.greeks.numerical.theta = partial(vectorized_theta, model="black_scholes_merton")
-py_vollib.black_scholes_merton.greeks.numerical.vega = partial(vectorized_vega, model="black_scholes_merton")
+py_vollib.black_scholes_merton.implied_volatility.implied_volatility = repr_partial(implied_volatility_vectorized,
+                                                                        model="black_scholes_merton")
+update_wrapper(py_vollib.black_scholes_merton.implied_volatility.implied_volatility, implied_volatility_vectorized)
 
 
+## Greeks
+
+import py_vollib.black.greeks.numerical
+
+py_vollib.black.greeks.numerical.delta = repr_partial(vectorized_delta, model="black")
+py_vollib.black.greeks.numerical.gamma = repr_partial(vectorized_gamma, model="black")
+py_vollib.black.greeks.numerical.rho = repr_partial(vectorized_rho, model="black")
+py_vollib.black.greeks.numerical.theta = repr_partial(vectorized_theta, model="black")
+py_vollib.black.greeks.numerical.vega = repr_partial(vectorized_vega, model="black")
+
+import py_vollib.black_scholes.greeks.numerical
+
+py_vollib.black_scholes.greeks.numerical.delta = repr_partial(vectorized_delta, model="black_scholes")
+py_vollib.black_scholes.greeks.numerical.gamma = repr_partial(vectorized_gamma, model = "black_scholes")
+py_vollib.black_scholes.greeks.numerical.rho = repr_partial(vectorized_rho, model = "black_scholes")
+py_vollib.black_scholes.greeks.numerical.theta = repr_partial(vectorized_theta, model = "black_scholes")
+py_vollib.black_scholes.greeks.numerical.vega = repr_partial(vectorized_vega, model = "black_scholes")
+
+import py_vollib.black_scholes_merton.greeks.numerical
+
+py_vollib.black_scholes_merton.greeks.numerical.delta = repr_partial(vectorized_delta, model="black_scholes_merton")
+py_vollib.black_scholes_merton.greeks.numerical.gamma = repr_partial(vectorized_gamma, model="black_scholes_merton")
+py_vollib.black_scholes_merton.greeks.numerical.rho = repr_partial(vectorized_rho, model="black_scholes_merton")
+py_vollib.black_scholes_merton.greeks.numerical.theta = repr_partial(vectorized_theta, model="black_scholes_merton")
+py_vollib.black_scholes_merton.greeks.numerical.vega = repr_partial(vectorized_vega, model="black_scholes_merton")

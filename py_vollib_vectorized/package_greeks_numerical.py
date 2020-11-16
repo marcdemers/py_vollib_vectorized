@@ -55,7 +55,6 @@ def numerical_vega_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):
     return np.array(vegas)
 
 
-# TODO rho has a different b than the rest in the pricing function@maybe_jit()
 @maybe_jit()
 def numerical_rho_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):
     rhos = []
@@ -144,7 +143,6 @@ def numerical_vega_black_scholes_merton(flags, Ss, Ks, ts, rs, sigmas, bs):
     return np.array(vegas)
 
 
-# TODO rho has a different b than the rest in the pricing function@maybe_jit()
 @maybe_jit()
 def numerical_rho_black_scholes_merton(flags, Ss, Ks, ts, rs, sigmas, bs):
     rhos = []

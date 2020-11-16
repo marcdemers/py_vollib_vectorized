@@ -134,4 +134,3 @@ for run in range(10):
 
 print("check verification:", np.all(checks))
 print("times", run_time)
-#TODO support both numpy arrays and dataframes as input

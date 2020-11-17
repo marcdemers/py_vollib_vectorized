@@ -52,23 +52,13 @@ def normalised_black_call(x, s):
 
 
 @maybe_jit()
-def normalised_black(x, s, q) -> float:
-    """
-    :param x:
-    :type x: float
-    :param s:
-    :type s: float
-    :param q: q=±1
-    :type q: float
-    :return:
-    :rtype: float
-    """
-    out = normalised_black_call(-x if q < 0 else x, s)  # Reciprocal-strike call-put equivalence
-    return out
+def normalised_black(x, s, q):
+    return normalised_black_call(-x if q < 0 else x, s)  # Reciprocal-strike call-put equivalence
 
 
+# TODO needs simplifcation
 @maybe_jit()
-def undiscounted_black(F, K, sigma, t, flag) -> np.float64:
+def undiscounted_black(F, K, sigma, t, flag):
     """Calculate the **undiscounted** Black option price.
     :param F: underlying futures price
     :type F: float
@@ -87,14 +77,8 @@ def undiscounted_black(F, K, sigma, t, flag) -> np.float64:
     5.637197779701664
 
     """
-
     q = flag
-    # F = float(F)
-    # K = float(K)
-    # sigma = float(sigma)
-    # t = float(t)
-    out = black(F, K, sigma, t, q)
-    return out
+    return black(F, K, sigma, t, q)
 
 
 @maybe_jit()
@@ -121,18 +105,9 @@ def black_scholes(flag, S, K, t, r, sigma):
     >>> abs(p - 1.66270456231) < .000001
     True
     """
-
     deflater = np.exp(-r * t)
     F = S / deflater
-
-    # flag=float(flag)
-    # F = float(F)
-    # K = float(K)
-    # sigma = float(sigma)
-    # t = float(t)
-
-    out = undiscounted_black(F, K, sigma, t, flag)
-    return out * deflater
+    return undiscounted_black(F, K, sigma, t, flag) * deflater
 
 
 @maybe_jit()
@@ -166,12 +141,11 @@ def black_scholes_merton(flag, S, K, t, r, sigma, q):
 
     F = S * np.exp((r - q) * t)
     deflater = np.exp(-r * t)
-    out = black(F, K, sigma, t, flag)
-    return out * deflater
+    return black(F, K, sigma, t, flag) * deflater
 
 
 @maybe_jit()
-def black(F: float, K: float, sigma: float, T: float, q: float) -> float:
+def black(F, K, sigma, T, q):
     """
     :param F:
     :type F: float
@@ -193,3 +167,27 @@ def black(F: float, K: float, sigma: float, T: float, q: float) -> float:
     return np.maximum(intrinsic,
                       (np.sqrt(F) * np.sqrt(K)) * normalised_black(np.log(F / K), sigma * np.sqrt(T), q)
                       )
+
+
+@maybe_jit()
+def _black_scholes_vectorized_call(flags, Ss, Ks, ts, rs, sigmas):
+    prices = []
+    for q, S, K, t, r, sigma in zip(flags, Ss, Ks, ts, rs, sigmas):
+        prices.append(black_scholes(q, S, K, t, r, sigma))
+    return np.array(prices)
+
+
+@maybe_jit()
+def _black_vectorized_call(Fs, Ks, sigmas, ts, flag):
+    prices = []
+    for F, K, sigma, T, q in zip(Fs, Ks, sigmas, ts, flag):
+        prices.append(black(F, K, sigma, T, q))
+    return np.array(prices)
+
+
+@maybe_jit()
+def _black_scholes_merton_vectorized_call(flags, Ss, Ks, ts, rs, sigmas, qs):
+    prices = []
+    for f, S, K, t, r, sigma, q in zip(flags, Ss, Ks, ts, rs, sigmas, qs):
+        prices.append(black_scholes(f, S, K, t, r, sigma, q))
+    return np.array(prices)

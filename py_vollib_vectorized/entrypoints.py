@@ -13,6 +13,8 @@ from .numerical_greeks import numerical_delta_black_scholes, numerical_theta_bla
 from .numerical_greeks import numerical_delta_black_scholes_merton, numerical_theta_black_scholes_merton, \
     numerical_vega_black_scholes_merton, numerical_rho_black_scholes_merton, numerical_gamma_black_scholes_merton
 
+from .model_calls import _black_scholes_merton_vectorized_call, _black_vectorized_call, _black_scholes_vectorized_call
+
 
 def _preprocess_flags(flags, dtype):
     return np.array([binary_flag[f] for f in flags], dtype=dtype)
@@ -129,7 +131,6 @@ def implied_volatility_vectorized(price, S, K, t, r, flag, q=None, on_error="war
     _check_below_and_above_intrinsic(K, F, flag, undiscounted_option_price, on_error)
     sigma_calc = implied_volatility_from_a_transformed_rational_guess(undiscounted_option_price, F, K, t, flag)
 
-    # TODO send user warning instead of error, and fix the kwarg on_error
     if on_error != "ignore":
         if np.any(sigma_calc == FLOAT_MAX):
             if on_error == "warn":
@@ -255,8 +256,8 @@ def delta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the delta for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    price, S, K, t, r = maybe_format_data(S, K, t, r, dtype=dtype)
-    _validate_data(price, S, K, t, r, flag)
+    S, K, t, r, sigma = maybe_format_data(S, K, t, r, sigma, dtype=dtype)
+    _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
         b = 0
@@ -299,8 +300,8 @@ def theta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the theta for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    price, S, K, t, r = maybe_format_data(S, K, t, r, dtype=dtype)
-    _validate_data(price, S, K, t, r, flag)
+    S, K, t, r, sigma = maybe_format_data(S, K, t, r, sigma, dtype=dtype)
+    _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
         b = 0
@@ -344,8 +345,8 @@ def vega(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="data
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the vega for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    price, S, K, t, r = maybe_format_data(S, K, t, r, dtype=dtype)
-    _validate_data(price, S, K, t, r, flag)
+    S, K, t, r, sigma = maybe_format_data(S, K, t, r, sigma, dtype=dtype)
+    _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
         b = 0
@@ -390,8 +391,8 @@ def rho(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataf
     """
 
     flag = _preprocess_flags(flag, dtype=dtype)
-    price, S, K, t, r = maybe_format_data(S, K, t, r, dtype=dtype)
-    _validate_data(price, S, K, t, r, flag)
+    S, K, t, r, sigma = maybe_format_data(S, K, t, r, sigma, dtype=dtype)
+    _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
         b = 0
@@ -435,11 +436,13 @@ def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the gamma for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    price, S, K, t, r = maybe_format_data(S, K, t, r, dtype=dtype)
-    _validate_data(price, S, K, t, r, flag)
+    S, K, t, r, sigma = maybe_format_data(S, K, t, r, sigma, dtype=dtype)
+    _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
         b = 0
+        # TODO for these models are we certain that black schoels behaves same as black? because in the call to numerical
+        # black scholes, it calls the black_scholes function and not the black function.
         gamma = numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b)
     elif model == "black_scholes":
         b = r
@@ -462,6 +465,45 @@ def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     return gamma
 
 
-# TODO iv models
-def black_scholes_merton_vectorized():
-    pass
+###### IV models
+
+def black_vectorized(Fs, Ks, sigmas, ts, flags, return_as="dataframe", dtype=np.float64):
+    flag = _preprocess_flags(flags, dtype=dtype)
+    Fs, Ks, sigmas, ts = maybe_format_data(Fs, Ks, sigmas, ts, dtype=dtype)
+    _validate_data(Fs, Ks, sigmas, ts, flag)
+
+    prices = _black_vectorized_call(Fs, Ks, sigmas, ts, flag)
+
+    if return_as == "series":
+        return pd.Series(prices, name="Price")
+    elif return_as == "dataframe":
+        return pd.DataFrame(prices, columns=["Price"])
+    return np.array(prices)
+
+
+def black_scholes_vectorized(flags, Ss, Ks, ts, rs, sigmas, return_as="dataframe", dtype=np.float64):
+    flag = _preprocess_flags(flags, dtype=dtype)
+    Ss, Ks, sigmas, ts = maybe_format_data(Ss, Ks, sigmas, ts, dtype=dtype)
+    _validate_data(Ss, Ks, sigmas, ts, flag)
+
+    prices = _black_scholes_vectorized_call(flags, Ss, Ks, ts, rs, sigmas)
+
+    if return_as == "series":
+        return pd.Series(prices, name="Price")
+    elif return_as == "dataframe":
+        return pd.DataFrame(prices, columns=["Price"])
+    return np.array(prices)
+
+
+def black_scholes_merton_vectorized(flags, Ss, Ks, ts, rs, sigmas, qs, return_as="dataframe", dtype=np.float64):
+    flag = _preprocess_flags(flags, dtype=dtype)
+    flag, Ss, Ks, ts, rs, sigmas, qs = maybe_format_data(flag, Ss, Ks, ts, rs, sigmas, qs, dtype=dtype)
+    _validate_data(flag, Ss, Ks, ts, rs, sigmas, qs)
+
+    prices = _black_scholes_merton_vectorized_call(flag, Ss, Ks, ts, rs, sigmas, qs)
+
+    if return_as == "series":
+        return pd.Series(prices, name="Price")
+    elif return_as == "dataframe":
+        return pd.DataFrame(prices, columns=["Price"])
+    return np.array(prices)

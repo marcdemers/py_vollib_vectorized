@@ -1,4 +1,4 @@
-from py_vollib_vectorized.iv_models import *
+from py_vollib_vectorized.entrypoints import *
 
 
 
@@ -124,9 +124,11 @@ for run in range(10):
             sigma=data["IV"].iloc[i],
         )
 
-        print(d[0], orig_d)
+        print(d.iloc[0].item(), orig_d.iloc[0].item())
         # print(t == orig_t)
-        checks.append(r[0] == orig_r and v[0] == orig_v and g[0] == orig_g and d[0] == orig_d and t[0] == orig_t)
+        checks.append(r.iloc[0].item() == orig_r.iloc[0].item() and v.iloc[0].item() == orig_v.iloc[0].item() and g.iloc[0].item() == orig_g.iloc[
+            0].item() and d.iloc[
+            0].item() == orig_d.iloc[0].item() and t.iloc[0].item() == orig_t.iloc[0].item())
         print("**"*10)
 
     toc = time()

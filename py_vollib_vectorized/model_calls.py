@@ -97,7 +97,6 @@ def undiscounted_black(F, K, sigma, t, flag) -> np.float64:
     return out
 
 
-# @njit(cache=True)
 @maybe_jit()
 def black_scholes(flag, S, K, t, r, sigma):
     """Return the Black-Scholes option price.

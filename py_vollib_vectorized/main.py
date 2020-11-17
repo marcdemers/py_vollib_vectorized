@@ -1,4 +1,4 @@
-from py_vollib_vectorized.package import *
+from py_vollib_vectorized.iv_models import *
 
 
 

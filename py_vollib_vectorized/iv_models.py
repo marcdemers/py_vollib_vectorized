@@ -23,56 +23,25 @@ def implied_volatility_from_a_transformed_rational_guess(price, F, K, T, q):
 
 @maybe_jit()
 def implied_volatility_from_a_transformed_rational_guess_with_limited_iterations(
-        PX, FF, KK, TT, qq, N
+        prices, Fs, strikes, ttes, qs, N
 ):
-    """
-    :param price:
-    :type price: float
-    :param F:
-    :type F: float
-    :param K:
-    :type K: float
-    :param T:
-    :type T: float
-    :param q: q=±1
-    :type q:float
-    :param N:
-    :type N:int
-    :return:
-    :rtype: float
-    """
-    ret = []
-    #TODO switch to zip()
-    for i in range(len(KK)):
-        K = KK[i]
-        F = FF[i]
-        q = qq[i]
-        price = PX[i]
-        T = TT[i]
+    ivs = []
+    for K, F, q, price, T in zip(strikes, Fs, qs, prices, ttes):
         intrinsic = np.abs(max(K - F if q < 0 else F - K, 0.0))
-        # The exceptions are commented out because they will yield 0's in the IV anyways.
-        #         if price < intrinsic:
-        #             #raise BelowIntrinsicException
-        #             ret.append(np.nan)
-        #             continue
-        max_price = K if q < 0 else F
-        #         if price >= max_price:
-        #             #raise AboveMaximumException
-        #             ret.append(np.nan)
-        #             continue
+
         x = np.log(F / K)
 
         # Map in-the-money to out-of-the-money
         if q * x > 0:
             price = np.abs(max(price - intrinsic, 0.0))
             q = -q
-        outp = _unchecked_normalised_implied_volatility_from_a_transformed_rational_guess_with_limited_iterations(
+        iv = _unchecked_normalised_implied_volatility_from_a_transformed_rational_guess_with_limited_iterations(
             price / (np.sqrt(F) * np.sqrt(K)), x, q, N
         ) / np.sqrt(
             T
         )
-        ret.append(outp)
-    return np.array(ret)
+        ivs.append(iv)
+    return np.array(ivs)
 
 
 @maybe_jit()

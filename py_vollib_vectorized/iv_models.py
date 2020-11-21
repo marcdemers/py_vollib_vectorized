@@ -1,5 +1,5 @@
-import numba
 from .jit_helper import maybe_jit
+
 
 import numpy as np
 import py_lets_be_rational

@@ -1,4 +1,3 @@
-import numba
 import numpy as np
 from py_lets_be_rational.constants import *
 from py_lets_be_rational.rationalcubic import *
@@ -189,5 +188,5 @@ def _black_vectorized_call(Fs, Ks, sigmas, ts, flag):
 def _black_scholes_merton_vectorized_call(flags, Ss, Ks, ts, rs, sigmas, qs):
     prices = []
     for f, S, K, t, r, sigma, q in zip(flags, Ss, Ks, ts, rs, sigmas, qs):
-        prices.append(black_scholes(f, S, K, t, r, sigma, q))
+        prices.append(black_scholes_merton(f, S, K, t, r, sigma, q))
     return np.array(prices)

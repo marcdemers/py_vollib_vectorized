@@ -1,10 +1,8 @@
 from py_vollib_vectorized.entrypoints import *
 
-
-
 import pandas as pd
 
-data = pd.read_csv("fake_data.csv")
+data = pd.read_csv("../fake_data.csv")
 
 print(data)
 
@@ -22,24 +20,26 @@ ivs = implied_volatility_vectorized(
 
 data["IV"] = ivs
 
-
 #### greeks
 
-from py_vollib_vectorized.entrypoints import delta as my_delta, theta as my_theta, gamma as my_gamma, rho as my_rho, vega as my_vega
+from py_vollib_vectorized.entrypoints import delta as my_delta, theta as my_theta, gamma as my_gamma, rho as my_rho, \
+    vega as my_vega
 
-from py_vollib.black_scholes.greeks.numerical import delta as original_delta, gamma as original_gamma, rho as original_rho, theta as original_theta, vega as original_vega
+from py_vollib.black_scholes.greeks.numerical import delta as original_delta, gamma as original_gamma, \
+    rho as original_rho, theta as original_theta, vega as original_vega
+
 print(len(data))
 
 from time import time
+
 run_time = []
 checks = []
 for run in range(10):
     tic = time()
     i = 11
     for i in range(len(data)):
-
         d = my_delta(
-            flag=data["Flag"].iloc[i:i+1].values,
+            flag=data["Flag"].iloc[i:i + 1].values,
             S=data["Px"].iloc[i:i + 1].values,
             K=data["Strike"].iloc[i:i + 1].values,
             t=data["Annualized Time To Expiration"].iloc[i:i + 1].values,
@@ -82,7 +82,7 @@ for run in range(10):
         print(i)
         # print(d)
         # print(t)
-        print(r)
+        print(t)
         orig_d = original_delta(
             flag=data["Flag"].iloc[i],
             S=data["Px"].iloc[i],
@@ -99,6 +99,7 @@ for run in range(10):
             r=data["Interest Free Rate"].iloc[i],
             sigma=data["IV"].iloc[i],
         )
+        print(orig_t)
         orig_r = original_rho(
             flag=data["Flag"].iloc[i],
             S=data["Px"].iloc[i],
@@ -124,15 +125,17 @@ for run in range(10):
             sigma=data["IV"].iloc[i],
         )
 
-        print(d.iloc[0].item(), orig_d.iloc[0].item())
-        # print(t == orig_t)
-        checks.append(r.iloc[0].item() == orig_r.iloc[0].item() and v.iloc[0].item() == orig_v.iloc[0].item() and g.iloc[0].item() == orig_g.iloc[
-            0].item() and d.iloc[
-            0].item() == orig_d.iloc[0].item() and t.iloc[0].item() == orig_t.iloc[0].item())
-        print("**"*10)
+        # print(d.iloc[0].item(), orig_d.iloc[0].item())
+        print(t == orig_t)
+        # checks.append(
+        #     r.iloc[0].item() == orig_r.iloc[0].item() and v.iloc[0].item() == orig_v.iloc[0].item() and g.iloc[
+        #         0].item() == orig_g.iloc[
+        #         0].item() and d.iloc[
+        #         0].item() == orig_d.iloc[0].item() and t.iloc[0].item() == orig_t.iloc[0].item())
+        print("**" * 10)
 
     toc = time()
-    run_time.append(toc-tic)
+    run_time.append(toc - tic)
 
 print("check verification:", np.all(checks))
 print("times", run_time)

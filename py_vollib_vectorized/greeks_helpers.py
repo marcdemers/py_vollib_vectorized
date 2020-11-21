@@ -40,6 +40,7 @@ def _normalised_intrinsic_call(x):
     """
     return _normalised_intrinsic(x, 1)
 
+
 @maybe_jit()
 def _small_t_expansion_of_normalized_black_call(h, t):
     """
@@ -312,6 +313,7 @@ def _asymptotic_expansion_of_normalized_black_call(h, t):
     b = ONE_OVER_SQRT_TWO_PI * np.exp((-0.5 * (h * h + t * t))) * (t / r) * asymptotic_expansion_sum
     return np.abs(np.maximum(b, 0))
 
+
 ### ERF calculations
 
 @maybe_jit(nogil=True)
@@ -344,9 +346,9 @@ XBIG = 26.543
 XHUGE = 6.71e7
 XMAX = 2.53e307
 
+
 @maybe_jit(cache=True)
 def calerf(x, jint):
-
     y = np.abs(x)
     if y <= THRESH:
 
@@ -407,13 +409,11 @@ def calerf(x, jint):
             d__1 = np.exp(-ysq * ysq) * np.exp(-_del)
             result *= d__1
 
-
     return fix_up_for_negative_argument_erf_etc(jint, result, x)
 
 
 @maybe_jit(nogil=True)
 def fix_up_for_negative_argument_erf_etc(jint, result, x):
-
     if jint == 0:
         result = (HALF - result) + HALF
         if x < ZERO:
@@ -444,10 +444,6 @@ def erfc_cody(x):
     return calerf(x, 1)
 
 
-
 @maybe_jit()
 def erfcx_cody(x):
     return calerf(x, 2)
-
-
-

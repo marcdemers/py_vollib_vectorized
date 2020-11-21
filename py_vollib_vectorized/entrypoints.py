@@ -25,6 +25,9 @@ def _maybe_format_data(data, dtype):
         return np.array([data], dtype=dtype)
     elif isinstance(data, pd.Series):
         return data.values.astype(dtype)
+    elif isinstance(data, pd.DataFrame):
+        assert data.shape[1] == 1, "You passed a `pandas.DataFrame` object that contains more than (1) column!"
+        return data.values.astype(dtype)
     elif isinstance(data, (list, tuple)):
         return np.array(data, dtype=dtype)
     elif isinstance(data, np.ndarray):
@@ -195,42 +198,29 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", retur
     :return: `pd.DataFrame`, `json` string, or `dict` object containing the greeks for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    price, S, K, t, r = maybe_format_data(S, K, t, r, dtype=dtype)
-    _validate_data(price, S, K, t, r, flag)
+    S, K, t, r, sigma = maybe_format_data(S, K, t, r, sigma, dtype=dtype)
+    _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
         b = 0
-        greeks = {
-            "delta": numerical_delta_black_scholes(flag, S, K, t, r, sigma, b),
-            "gamma": numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b),
-            "theta": numerical_theta_black_scholes(flag, S, K, t, r, sigma, b),
-            "rho": numerical_rho_black_scholes(flag, S, K, t, r, sigma, b),
-            "vega": numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
-        }
     elif model == "black_scholes":
         b = r
-        greeks = {
-            "delta": numerical_delta_black_scholes(flag, S, K, t, r, sigma, b),
-            "gamma": numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b),
-            "theta": numerical_theta_black_scholes(flag, S, K, t, r, sigma, b),
-            "rho": numerical_rho_black_scholes(flag, S, K, t, r, sigma, b),
-            "vega": numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
-        }
     elif model == "black_scholes_merton":
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
         q = maybe_format_data(q, dtype=dtype)[0]
         _validate_data(r, q)
         b = r - q
-        greeks = {
-            "delta": numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b),
-            "gamma": numerical_gamma_black_scholes_merton(flag, S, K, t, r, sigma, b),
-            "theta": numerical_theta_black_scholes_merton(flag, S, K, t, r, sigma, b),
-            "rho": numerical_rho_black_scholes_merton(flag, S, K, t, r, sigma, b),
-            "vega": numerical_vega_black_scholes_merton(flag, S, K, t, r, sigma, b)
-        }
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
+
+    greeks = {
+        "delta": numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b),
+        "gamma": numerical_gamma_black_scholes_merton(flag, S, K, t, r, sigma, b),
+        "theta": numerical_theta_black_scholes_merton(flag, S, K, t, r, sigma, b),
+        "rho": numerical_rho_black_scholes_merton(flag, S, K, t, r, sigma, b),
+        "vega": numerical_vega_black_scholes_merton(flag, S, K, t, r, sigma, b)
+    }
 
     if return_as == "dataframe":
         return pd.DataFrame.from_dict(greeks)
@@ -467,26 +457,12 @@ def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
 
 ###### IV models
 
-def black_vectorized(Fs, Ks, sigmas, ts, flags, return_as="dataframe", dtype=np.float64):
-    flag = _preprocess_flags(flags, dtype=dtype)
-    Fs, Ks, sigmas, ts = maybe_format_data(Fs, Ks, sigmas, ts, dtype=dtype)
-    _validate_data(Fs, Ks, sigmas, ts, flag)
+def black_vectorized(F, K, sigma, t, flag, return_as="dataframe", dtype=np.float64):
+    flag = _preprocess_flags(flag, dtype=dtype)
+    F, K, sigma, t = maybe_format_data(F, K, sigma, t, dtype=dtype)
+    _validate_data(F, K, sigma, t, flag)
 
-    prices = _black_vectorized_call(Fs, Ks, sigmas, ts, flag)
-
-    if return_as == "series":
-        return pd.Series(prices, name="Price")
-    elif return_as == "dataframe":
-        return pd.DataFrame(prices, columns=["Price"])
-    return np.array(prices)
-
-
-def black_scholes_vectorized(flags, Ss, Ks, ts, rs, sigmas, return_as="dataframe", dtype=np.float64):
-    flag = _preprocess_flags(flags, dtype=dtype)
-    Ss, Ks, sigmas, ts = maybe_format_data(Ss, Ks, sigmas, ts, dtype=dtype)
-    _validate_data(Ss, Ks, sigmas, ts, flag)
-
-    prices = _black_scholes_vectorized_call(flags, Ss, Ks, ts, rs, sigmas)
+    prices = _black_vectorized_call(F, K, sigma, t, flag)
 
     if return_as == "series":
         return pd.Series(prices, name="Price")
@@ -495,12 +471,26 @@ def black_scholes_vectorized(flags, Ss, Ks, ts, rs, sigmas, return_as="dataframe
     return np.array(prices)
 
 
-def black_scholes_merton_vectorized(flags, Ss, Ks, ts, rs, sigmas, qs, return_as="dataframe", dtype=np.float64):
-    flag = _preprocess_flags(flags, dtype=dtype)
-    flag, Ss, Ks, ts, rs, sigmas, qs = maybe_format_data(flag, Ss, Ks, ts, rs, sigmas, qs, dtype=dtype)
-    _validate_data(flag, Ss, Ks, ts, rs, sigmas, qs)
+def black_scholes_vectorized(flag, S, K, t, r, sigma, return_as="dataframe", dtype=np.float64):
+    flag = _preprocess_flags(flag, dtype=dtype)
+    S, K, sigma, t, r = maybe_format_data(S, K, sigma, t, r, dtype=dtype)
+    _validate_data(S, K, sigma, t, r, flag)
 
-    prices = _black_scholes_merton_vectorized_call(flag, Ss, Ks, ts, rs, sigmas, qs)
+    prices = _black_scholes_vectorized_call(flag, S, K, t, r, sigma)
+
+    if return_as == "series":
+        return pd.Series(prices, name="Price")
+    elif return_as == "dataframe":
+        return pd.DataFrame(prices, columns=["Price"])
+    return np.array(prices)
+
+
+def black_scholes_merton_vectorized(flag, S, K, t, r, sigma, q, return_as="dataframe", dtype=np.float64):
+    flag = _preprocess_flags(flag, dtype=dtype)
+    flag, S, K, t, r, sigma, q = maybe_format_data(flag, S, K, t, r, sigma, q, dtype=dtype)
+    _validate_data(flag, S, K, t, r, sigma, q)
+
+    prices = _black_scholes_merton_vectorized_call(flag, S, K, t, r, sigma, q)
 
     if return_as == "series":
         return pd.Series(prices, name="Price")

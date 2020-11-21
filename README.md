@@ -2,7 +2,8 @@
 
 ## Introduction
 
-A vectorized implementation of py_vollib, that supports both numpy array and pandas Series and DataFrames
+Pricing millions of option contracts can be costly.
+This work is a vectorized implementation of the py_vollib library, that supports both numpy array and pandas Series and DataFrames.
 
 ## Table of contens
 
@@ -29,7 +30,7 @@ A vectorized implementation of py_vollib, that supports both numpy array and pan
 
 ## Installation
 
-    pip install pytrends
+    pip install fast_py_vollib
 
 ## Requirements
 
@@ -38,59 +39,7 @@ A vectorized implementation of py_vollib, that supports both numpy array and pan
 
 <sub><sup>[back to top](#pytrends)</sub></sup>
 
-## API
-
-### Connect to Google
-
-    from pytrends.request import TrendReq
-
-    pytrends = TrendReq(hl='en-US', tz=360)
-
-or if you want to use proxies as you are blocked due to Google rate limit:
-
-
-    from pytrends.request import TrendReq
-
-    pytrends = TrendReq(hl='en-US', tz=360, timeout=(10,25), proxies=['https://34.203.233.13:80',], retries=2, backoff_factor=0.1, requests_args={'verify':False})
-
-* `timeout(connect, read)`
-  - See explantation on this on [requests docs](https://requests.readthedocs.io/en/master/user/advanced/#timeouts)
-* tz
-  - Timezone Offset
-  - For example US CST is ```'360'``` (note **NOT** -360, Google uses timezone this way...)
-
-* `proxies`
-
-  - https proxies Google passed ONLY
-  - list ```['https://34.203.233.13:80','https://35.201.123.31:880', ..., ...]```
-  
-* `retries`
-
-  - number of retries total/connect/read all represented by one scalar
-
-* `backoff_factor`
-
-  - A backoff factor to apply between attempts after the second try (most errors are resolved immediately by a second try without a delay). urllib3 will sleep for: ```{backoff factor} * (2 ^ ({number of total retries} - 1))``` seconds. If the backoff_factor is 0.1, then sleep() will sleep for [0.0s, 0.2s, 0.4s, …] between retries. It will never be longer than Retry.BACKOFF_MAX. By default, backoff is disabled (set to 0).
-
-* `requests_args`
-  - A dict with additional parameters to pass along to the underlying requests library, for example verify=False to ignore SSL errors
-
-Note: the parameter `hl` specifies host language for accessing Google Trends. 
-Note: only https proxies will work, and you need to add the port number after the proxy ip address
-
-### Build Payload
-    kw_list = ["Blockchain"]
-    pytrends.build_payload(kw_list, cat=0, timeframe='today 5-y', geo='', gprop='')
-
-Parameters
-
-* `kw_list`
-
-  - *Required*
-  - Keywords to get data for
-
-
-<sub><sup>[back to top](#API)</sub></sup>
+## Speed benchmark
 
 ## API Methods
 

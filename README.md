@@ -2,285 +2,76 @@
 
 ## Introduction
 
-Pricing millions of option contracts can be costly.
-This work is a vectorized implementation of the py_vollib library, that supports both numpy array and pandas Series and DataFrames.
+The `py_vollib_vectorized` package makes pricing thousands of option contracts and calculating greeks fast and effortless.
+It is built on top of the `py_vollib` library.
+Upon import, it will automatically patch the corresponding `py_vollib` functions so as to support vectorization.
+Inputs can then be passed as `numpy.array`, `pandas.Series` or `pandas.DataFrame`.
 
-## Table of contens
+On top of vectorization, modifications to py_vollib include additional `numba` speedups; as such, `numba` *is* required.
 
-* [Installation](#installation)
-
-* [API](#api)
-
-  * [API Methods](#api-methods)
-
-  * [Common API parameters](#common-api-parameters)
-
-    * [Interest Over Time](#interest-over-time)
-    * [Historical Hourly Interest](#historical-hourly-interest)
-    * [Interest by Region](#interest-by-region)
-    * [Related Topics](#related-topics)
-    * [Related Queries](#related-queries)
-    * [Trending Searches](#trending-searches)
-    * [Top Charts](#top-charts)
-    * [Suggestions](#suggestions)
-
-  * [Caveats](#caveats)
-
-* [Credits](#credits)
+Users should refer to the `py_vollib` documentation for definitions and signature.
 
 ## Installation
 
     pip install fast_py_vollib
-
+    
 ## Requirements
 
-* Written for Python 3.3+
-* Requires Requests, lxml, Pandas
+* Written for Python 3.5+
+* Requires py_vollib, numba, numpy, pandas, scipy
 
-<sub><sup>[back to top](#pytrends)</sub></sup>
+## Code samples
 
-## Speed benchmark
+#### Patching `py_vollib`
 
-## API Methods
+```python
+# The usual py_vollib syntax
 
-The following API methods are available:
+from py_vollib.black_scholes import black_scholes
+flag = 'c'  # 'c' for call, 'p' for put
+S = 100  # Underlying asset price
+K = 90  # Strike
+t = 0.5  # (Annualized) time-to-expiration
+r = 0.01  # Interest free rate
+iv = 0.2  # Implied Volatility
 
-* [Interest Over Time](#interest-over-time): returns historical, indexed data for when the keyword was searched most as shown on Google Trends' Interest Over Time section.
+option_price = black_scholes(flag, S, K, t, r, iv)  # 12.111581435
 
-* [Historical Hourly Interest](#historical-hourly-interest): returns historical, indexed, hourly data for when the keyword was searched most as shown on Google Trends' Interest Over Time section. It sends multiple requests to Google, each retrieving one week of hourly data. It seems like this would be the only way to get historical, hourly data. 
+# This library keeps the same syntax, but you can pass as input any iterable of values.
+# This includes list, tuple, numpy.array, pd.Series, pd.DataFrame (with only a single column).
+# Note that you must pass a value for each contract as *no broadcasting* is done on the inputs.
 
-* [Interest by Region](#interest-by-region): returns data for where the keyword is most searched as shown on Google Trends' Interest by Region section.
 
-* [Related Topics](#related-topics): returns data for the related keywords to a provided keyword shown on Google Trends' Related Topics section.
+# Patch the original py_vollib library by importing py_vollib_vectorized
+import py_vollib_vectorized  # The same functions now accept vectors as input!
 
-* [Related Queries](#related-queries): returns data for the related keywords to a provided keyword shown on Google Trends' Related Queries section.
+flag = ['c', 'p']  # 'c' for call, 'p' for put
+S = [100, 100]  # Underlying asset prices
+K = [90, 90]  # Strikes
+t = [0.5, 0.5]  # (Annualized) times-to-expiration
+r = [0.01, 0.01]  # Interest free rates
+iv = [0.2, 0.2]  # Implied Volatilities
 
-* [Trending Searches](#trending-searches): returns data for latest trending searches shown on Google Trends' Trending Searches section.
+option_price = black_scholes(flag, S, K, t, r, iv, return_as="array")  # array([12.111581435, 1.66270456231])
 
-* [Top Charts](#top-charts): returns the data for a given topic shown in Google Trends' Top Charts section.
+# TODO example with get_all_greeks
 
-* [Suggestions](#suggestions): returns a list of additional suggested keywords that can be used to refine a trend search.
+# We also define other utility functions to get all contract greeks in one call.
 
-<sub><sup>[back to top](#api-methods)</sub></sup>
+from py_vollib_vectorized import get_all_greeks
 
-## Common API parameters
+greeks = get_all_greeks(flag, S, K, t, r, iv, return_as='dataframe')
 
-Many API methods use the following:
+# greeks: 
 
-* `kw_list`
+```
 
-  - keywords to get data for
-  - Example ```['Pizza']```
-  - Up to five terms in a list: ```['Pizza', 'Italian', 'Spaghetti', 'Breadsticks', 'Sausage']```
+See the examples folder for detailed functionality. 
 
-    * Advanced Keywords
+## Benchmarking
 
-      - When using Google Trends dashboard Google may provide suggested narrowed search terms.
-      - For example ```"iron"``` will have a drop down of ```"Iron Chemical Element, Iron Cross, Iron Man, etc"```.
-      - Find the encoded topic by using the get_suggestions() function and choose the most relevant one for you.
-      - For example: ```https://www.google.com/trends/explore#q=%2Fm%2F025rw19&cmpt=q```
-      - ```"%2Fm%2F025rw19"``` is the topic "Iron Chemical Element" to use this with pytrends
-      - You can also use `pytrends.suggestions()` to automate this.
 
-* `cat`
 
-  - Category to narrow results
-  - Find available cateogies by inspecting the url when manually using Google Trends. The category starts after ```cat=``` and ends before the next ```&``` or view this [wiki page containing all available categories](https://github.com/pat310/google-trends-api/wiki/Google-Trends-Categories)
-  - For example: ```"https://www.google.com/trends/explore#q=pizza&cat=71"```
-  - ```'71'``` is the category
-  - Defaults to no category
+## Acknowledgements
 
-* `geo`
-
-  - Two letter country abbreviation
-  - For example United States is ```'US'```
-  - Defaults to World
-  - More detail available for States/Provinces by specifying additonal abbreviations
-  - For example: Alabama would be ```'US-AL'```
-  - For example: England would be ```'GB-ENG'```
-
-* `tz`
-
-  - Timezone Offset (in minutes)
-  - For more information of Timezone Offset, [view this wiki page containing about UCT offset](https://en.wikipedia.org/wiki/UTC_offset)
-  - For example US CST is ```'360'``` 
-
-* `timeframe`
-
-  - Date to start from
-  - Defaults to last 5yrs, `'today 5-y'`.
-  - Everything `'all'`
-  - Specific dates, 'YYYY-MM-DD YYYY-MM-DD' example `'2016-12-14 2017-01-25'`
-  - Specific datetimes, 'YYYY-MM-DDTHH YYYY-MM-DDTHH' example `'2017-02-06T10 2017-02-12T07'`
-      - Note Time component is based off UTC
-
-  - Current Time Minus Time Pattern:
-
-    - By Month: ```'today #-m'``` where # is the number of months from that date to pull data for
-      - For example: ``'today 3-m'`` would get data from today to 3months ago
-      - **NOTE** Google uses UTC date as *'today'*
-      - **Works for 1, 3, 12 months only!**
-
-    - Daily: ```'now #-d'``` where # is the number of days from that date to pull data for
-      - For example: ``'now 7-d'`` would get data from the last week
-      - **Works for 1, 7 days only!**
-
-    - Hourly: ```'now #-H'``` where # is the number of hours from that date to pull data for
-      - For example: ``'now 1-H'`` would get data from the last hour
-      - **Works for 1, 4 hours only!**
-
-* `gprop`
-
-  - What Google property to filter to
-  - Example ```'images'```
-  - Defaults to web searches
-  - Can be ```images```, ```news```, ```youtube``` or ```froogle``` (for Google Shopping results)
-
-
-<sub><sup>[back to top](#api-payload-keys)</sub></sup>
-
-### Interest Over Time
-
-    pytrends.interest_over_time()
-
-Returns pandas.Dataframe
-
-<sub><sup>[back to top](#interest_over_time)</sub></sup>
-
-
-### Historical Hourly Interest
-
-    pytrends.get_historical_interest(kw_list, year_start=2018, month_start=1, day_start=1, hour_start=0, year_end=2018, month_end=2, day_end=1, hour_end=0, cat=0, geo='', gprop='', sleep=0)
-    
-Parameters 
-
-* `kw_list`
-
-  - *Required*
-  - list of keywords that you would like the historical data
-
-* `year_start, month_start, day_start, hour_start, year_end, month_end, day_end, hour_end`
-
-  - the time period for which you would like the historical data
-  
-* `sleep`
-
-  - If you are rate-limited by Google, you should set this parameter to something (i.e. 60) to space off each API call. 
-  
-Returns pandas.Dataframe
-
-<sub><sup>[back to top](#historical-hourly-interest)</sub></sup>
-
-### Interest by Region
-
-    pytrends.interest_by_region(resolution='COUNTRY', inc_low_vol=True, inc_geo_code=False)
-
-Parameters
-
-* `resolution`
-
-  - 'CITY' returns city level data
-  - 'COUNTRY' returns country level data
-  - 'DMA'  returns Metro level data
-  - 'REGION'  returns Region level data
-
-* `inc_low_vol`
-
-  - True/False (includes google trends data for low volume countries/regions as well)
-
-* `inc_geo_code`
-  
-  - True/False (includes ISO codes of countries along with the names in the data)
-
-Returns pandas.DataFrame
-
-<sub><sup>[back to top](#interest_by_region)</sub></sup>
-
-### Related Topics
-
-    pytrends.related_topics()
-
-Returns dictionary of pandas.DataFrames
-
-<sub><sup>[back to top](#related_topics)</sub></sup>
-
-### Related Queries
-
-    pytrends.related_queries()
-
-Returns dictionary of pandas.DataFrames
-
-<sub><sup>[back to top](#related_queries)</sub></sup>
-
-### Trending Searches
-
-	pytrends.trending_searches(pn='united_states') # trending searches in real time for United States
-	pytrends.trending_searches(pn='japan') # Japan
-
-Returns pandas.DataFrame
-
-<sub><sup>[back to top](#trending_searches)</sub></sup>
-
-### Top Charts
-
-    pytrends.top_charts(date, hl='en-US', tz=300, geo='GLOBAL')
-
-Parameters
-
-* `date`
-
-  - *Required*
-  - YYYY integer
-  - Example `2019` for the year 2019 Top Chart data
-  - **Note** Google removed support for monthly queries (e.g. YYYY-MM)
-  - **Note** Google does not return data for the current year
-
-Returns pandas.DataFrame
-
-<sub><sup>[back to top](#top_charts)</sub></sup>
-
-### Suggestions
-
-    pytrends.suggestions(keyword)
-
-Parameters
-
-* `keyword`
-
-  - *Required*
-  - keyword to get suggestions for
-
-Returns dictionary
-
-<sub><sup>[back to top](#suggestions)</sub></sup>
-
-### Categories
-
-    pytrends.categories()
-
-Returns dictionary
-
-<sub><sup>[back to top](#suggestions)</sub></sup>
-
-# Caveats
-
-* This is not an official or supported API
-* Google may change aggregation level for items with very large or very small search volume
-* Rate Limit is not publicly known, let me know if you have a consistent estimate
-  * One user reports that 1,400 sequential requests of a 4 hours timeframe got them to the limit. (Replicated on 2 networks)
-  * It has been tested, and 60 seconds of sleep between requests (successful or not) is the correct amount once you reach the limit.
-* For certain configurations the dependency lib certifi requires the environment variable REQUESTS_CA_BUNDLE to be explicitly set and exported. This variable must contain the path where the ca-certificates are saved or a SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] error is given at runtime. 
-
-# Credits
-
-* Major JSON revision ideas taken from pat310's JavaScript library
-
-  - https://github.com/pat310/google-trends-api
-
-* Connecting to google code heavily based off Stack Overflow post
-
-  - http://stackoverflow.com/questions/6754709/logging-in-to-google-using-python
-
-* With some ideas pulled from Matt Reid's Google Trends API
-
-  - https://bitbucket.org/mattreid9956/google-trend-api/overview
+This library optimizes the `py_vollib` codebase, itself built upon Peter Jäckel's *Let's be rational* methodology.

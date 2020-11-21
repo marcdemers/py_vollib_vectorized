@@ -19,6 +19,7 @@ from .model_calls import _black_scholes_merton_vectorized_call, _black_vectorize
 def _preprocess_flags(flags, dtype):
     return np.array([binary_flag[f] for f in flags], dtype=dtype)
 
+#TODO examples for each function
 
 def _maybe_format_data(data, dtype):
     if isinstance(data, (int, float)):

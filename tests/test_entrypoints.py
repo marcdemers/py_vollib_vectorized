@@ -22,9 +22,6 @@ class Test(TestCase):
             self.test_df_puts["flag"] = "p"
             self.test_df_puts["q"] = 0
 
-    # ['S', 'K', 'R', 't', 'v', 'bs_call', 'bs_put', 'CD', 'CG', 'CT', 'CV',
-    # 'CR', 'PD', 'PG', 'PT', 'PV', 'PR', 'call_vals']
-
     def test_implied_volatility_vectorized(self):
         # Call
         ivs = implied_volatility_vectorized(

@@ -1,5 +1,5 @@
 
-from functools import partial, update_wrapper
+fom functools import partial, update_wrapper
 
 from .entrypoints import implied_volatility_vectorized_black, implied_volatility_vectorized
 from .entrypoints import get_all_greeks
@@ -7,7 +7,6 @@ from .entrypoints import delta as vectorized_delta, \
     gamma as vectorized_gamma, rho as vectorized_rho, vega as vectorized_vega, theta as vectorized_theta
 
 # TODO the readme file
-# TODO small test suite
 
 class repr_partial(partial):
     def __repr__(self):

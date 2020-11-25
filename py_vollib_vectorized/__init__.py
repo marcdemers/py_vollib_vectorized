@@ -1,5 +1,5 @@
 
-fom functools import partial, update_wrapper
+from functools import partial, update_wrapper
 
 from .entrypoints import implied_volatility_vectorized_black, implied_volatility_vectorized
 from .entrypoints import get_all_greeks

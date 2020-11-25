@@ -58,22 +58,48 @@ def _check_below_and_above_intrinsic(Ks, Fs, qs, prices, on_error):
     _max_price[qs < 0] = Ks[qs < 0]
     _max_price[qs > 0] = Fs[qs > 0]
 
+    _below_intrinsic_array, _above_max_price = [], []
+
     if on_error != "ignore":
         if np.any(prices < _intrinsic):
+            _below_intrinsic_array = np.argwhere(prices < _intrinsic).ravel().tolist()
             if on_error == "warn":
                 warnings.warn(
-                    "Found Below Intrinsic contracts at index {}".format(np.argwhere(prices < _intrinsic).ravel()),
+                    "Found Below Intrinsic contracts at index {}".format(_below_intrinsic_array),
                     stacklevel=2)
             elif on_error == "raise":
                 raise PriceIsBelowIntrinsic
         if np.any(prices >= _max_price):
+            _above_max_price = np.argwhere(prices >= _max_price).ravel().tolist()
             if on_error == "warn":
                 warnings.warn(
-                    "Found Above Maximum Price contracts at index {}".format(np.argwhere(prices >= _max_price).ravel()),
+                    "Found Above Maximum Price contracts at index {}".format(_above_max_price),
                     stacklevel=2)
             elif on_error == "raise":
                 raise PriceIsAboveMaximum
 
+    return _below_intrinsic_array, _above_max_price
+
+def _check_minus_above_float(values, on_error):
+    _below_float_min_array, _above_float_max_array = [], []
+    if on_error != "ignore":
+        if np.any(values == FLOAT_MAX):
+            _above_float_max_array = np.argwhere(values == FLOAT_MAX).ravel().tolist()
+            if on_error == "warn":
+                warnings.warn(
+                    "Found PriceAboveMaximum contracts at index {}".format(_above_float_max_array)
+                )
+            elif on_error == "raise":
+                raise PriceIsAboveMaximum()
+        elif np.any(values == MINUS_FLOAT_MAX):
+            _below_float_min_array = np.argwhere(values == MINUS_FLOAT_MAX).ravel().tolist()
+            if on_error == "warn":
+                warnings.warn(
+                    "Found PriceBelowMaximum contracts at index {}".format(_below_float_min_array)
+                )
+            elif on_error == "raise":
+                PriceIsBelowIntrinsic()
+    return _below_float_min_array, _above_float_max_array
 
 ######## IV
 
@@ -132,22 +158,17 @@ def implied_volatility_vectorized(price, S, K, t, r, flag, q=None, on_error="war
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
-    _check_below_and_above_intrinsic(K, F, flag, undiscounted_option_price, on_error)
+    below_intrinsic, above_max_price = _check_below_and_above_intrinsic(K, F, flag, undiscounted_option_price, on_error)
+
     sigma_calc = implied_volatility_from_a_transformed_rational_guess(undiscounted_option_price, F, K, t, flag)
 
-    if on_error != "ignore":
-        if np.any(sigma_calc == FLOAT_MAX):
-            if on_error == "warn":
-                warnings.warn(
-                    "Found PriceAboveMaximum contracts at index {}".format(np.argwhere(sigma_calc == FLOAT_MAX)))
-            elif on_error == "raise":
-                raise PriceIsAboveMaximum()
-        elif np.any(sigma_calc == MINUS_FLOAT_MAX):
-            if on_error == "warn":
-                warnings.warn(
-                    "Found PriceBelowMaximum contracts at index {}".format(np.argwhere(sigma_calc == FLOAT_MAX)))
-            elif on_error == "raise":
-                PriceIsBelowIntrinsic()
+    below_min_float, above_max_float = _check_minus_above_float(sigma_calc, on_error)
+
+    # postprocess the results
+    sigma_calc[below_intrinsic] = np.nan
+    sigma_calc[above_max_price] = np.nan
+    sigma_calc[below_min_float] = np.nan
+    sigma_calc[above_max_float] = np.nan
 
     if return_as == "series":
         return pd.Series(sigma_calc, name="IV")

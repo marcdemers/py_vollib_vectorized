@@ -9,6 +9,7 @@ from py_vollib_vectorized.entrypoints import black_scholes_vectorized, black_sch
 
 from py_vollib_vectorized.entrypoints import get_all_greeks
 
+#TODO unit tests for broadcasting
 
 class Test(TestCase):
     def setUp(self) -> None:

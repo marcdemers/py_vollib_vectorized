@@ -19,8 +19,6 @@ from .model_calls import _black_scholes_merton_vectorized_call, _black_vectorize
 def _preprocess_flags(flags, dtype):
     return np.array([binary_flag[f] for f in flags], dtype=dtype)
 
-#TODO examples for each function
-
 def _maybe_format_data(data, dtype):
     if isinstance(data, (int, float)):
         return np.array([data], dtype=dtype)
@@ -127,7 +125,8 @@ def implied_volatility_vectorized(price, S, K, t, r, flag, q=None, on_error="war
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the implied volatility for each contract.
     """
     flag = _preprocess_flags(flag, dtype)
-    price, S, K, t, r = maybe_format_data_and_broadcast(price, S, K, t, r, dtype=dtype)
+    #TODO put flag in maybe format data everywhere
+    price, S, K, t, r, flag = maybe_format_data_and_broadcast(price, S, K, t, r, flag, dtype=dtype)
     _validate_data(price, S, K, t, r, flag)
 
     assert on_error in ["warn", "ignore", "raise"], "`on_error` must be 'warn', 'ignore' or 'raise'."
@@ -221,7 +220,7 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", retur
     :return: `pd.DataFrame`, `json` string, or `dict` object containing the greeks for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    S, K, t, r, sigma = maybe_format_data_and_broadcast(S, K, t, r, sigma, dtype=dtype)
+    S, K, t, r, sigma, flag = maybe_format_data_and_broadcast(S, K, t, r, sigma, flag, dtype=dtype)
     _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
@@ -271,7 +270,7 @@ def delta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the delta for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    S, K, t, r, sigma = maybe_format_data_and_broadcast(S, K, t, r, sigma, dtype=dtype)
+    S, K, t, r, sigma, flag = maybe_format_data_and_broadcast(S, K, t, r, sigma, flag, dtype=dtype)
     _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
@@ -319,7 +318,7 @@ def theta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the theta for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    S, K, t, r, sigma = maybe_format_data_and_broadcast(S, K, t, r, sigma, dtype=dtype)
+    S, K, t, r, sigma, flag = maybe_format_data_and_broadcast(S, K, t, r, sigma, flag, dtype=dtype)
     _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
@@ -366,7 +365,7 @@ def vega(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="data
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the vega for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    S, K, t, r, sigma = maybe_format_data_and_broadcast(S, K, t, r, sigma, dtype=dtype)
+    S, K, t, r, sigma, flag = maybe_format_data_and_broadcast(S, K, t, r, sigma, flag, dtype=dtype)
     _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
@@ -414,7 +413,7 @@ def rho(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataf
     """
 
     flag = _preprocess_flags(flag, dtype=dtype)
-    S, K, t, r, sigma = maybe_format_data_and_broadcast(S, K, t, r, sigma, dtype=dtype)
+    S, K, t, r, sigma, flag = maybe_format_data_and_broadcast(S, K, t, r, sigma, flag, dtype=dtype)
     _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
@@ -461,7 +460,7 @@ def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the gamma for each contract.
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    S, K, t, r, sigma = maybe_format_data_and_broadcast(S, K, t, r, sigma, dtype=dtype)
+    S, K, t, r, sigma, flag = maybe_format_data_and_broadcast(S, K, t, r, sigma, flag, dtype=dtype)
     _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
@@ -492,10 +491,22 @@ def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
 
 
 ###### IV models
-#TODO docstrings
 def black_vectorized(F, K, sigma, t, flag, return_as="dataframe", dtype=np.float64):
+    """
+    Price a Future option using the Black pricing model.
+    Broadcasting is applied on the inputs
+    :param F: The price of the underlying asset.
+    :param K: The strike price.
+    :param sigma: The Implied Volatility (as a decimal, i.e. 0.10 for 10%).
+    :param t: The annualized time to expiration. Must be positive. For small TTEs, use a small value (1e-3).
+    :param flag: For each contract, this should be specified as `c` for a call option and `p` for a put option.
+    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use
+    "dataframe". Any other value will return a `numpy.array` object.
+    :param dtype: Data type.
+    :return: The price of the option.
+    """
     flag = _preprocess_flags(flag, dtype=dtype)
-    F, K, sigma, t = maybe_format_data_and_broadcast(F, K, sigma, t, dtype=dtype)
+    F, K, sigma, t, flag = maybe_format_data_and_broadcast(F, K, sigma, t, flag, dtype=dtype)
     _validate_data(F, K, sigma, t, flag)
 
     prices = _black_vectorized_call(F, K, sigma, t, flag)
@@ -508,8 +519,21 @@ def black_vectorized(F, K, sigma, t, flag, return_as="dataframe", dtype=np.float
 
 
 def black_scholes_vectorized(flag, S, K, t, r, sigma, return_as="dataframe", dtype=np.float64):
+    """
+    Price an option using the Black-Scholes model.
+    :param flag: For each contract, this should be specified as `c` for a call option and `p` for a put option.
+    :param S: The underlying asset price
+    :param K: The strike price.
+    :param t: The annualized time to expiration. Must be positive. For small TTEs, use a small value (1e-3).
+    :param r: The interest free rate.
+    :param sigma: The Implied Volatility (as a decimal, i.e. 0.10 for 10%).
+    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use
+    "dataframe". Any other value will return a `numpy.array` object.
+    :param dtype: Data type.
+    :return: The price of the option.
+    """
     flag = _preprocess_flags(flag, dtype=dtype)
-    S, K, sigma, t, r = maybe_format_data_and_broadcast(S, K, sigma, t, r, dtype=dtype)
+    S, K, sigma, t, r, flag = maybe_format_data_and_broadcast(S, K, sigma, t, r, flag, dtype=dtype)
     _validate_data(S, K, sigma, t, r, flag)
 
     prices = _black_scholes_vectorized_call(flag, S, K, t, r, sigma)
@@ -522,6 +546,20 @@ def black_scholes_vectorized(flag, S, K, t, r, sigma, return_as="dataframe", dty
 
 
 def black_scholes_merton_vectorized(flag, S, K, t, r, sigma, q, return_as="dataframe", dtype=np.float64):
+    """
+    Price an option using the Black-Scholes-Merton model.
+    :param flag: For each contract, this should be specified as `c` for a call option and `p` for a put option.
+    :param S: The underlying asset price
+    :param K: The strike price.
+    :param t: The annualized time to expiration. Must be positive. For small TTEs, use a small value (1e-3).
+    :param r: The interest free rate.
+    :param sigma: The Implied Volatility (as a decimal, i.e. 0.10 for 10%).
+    :param q: The annualized continuous dividend yield.
+    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use
+    "dataframe". Any other value will return a `numpy.array` object.
+    :param dtype: Data type.
+    :return: The price of the option.
+    """
     flag = _preprocess_flags(flag, dtype=dtype)
     flag, S, K, t, r, sigma, q = maybe_format_data_and_broadcast(flag, S, K, t, r, sigma, q, dtype=dtype)
     _validate_data(flag, S, K, t, r, sigma, q)

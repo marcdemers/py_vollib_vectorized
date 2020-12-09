@@ -1,4 +1,4 @@
-
+#TODO compare no numba at all, dataframe apply, our solution.
 # from py_vollib_vectorized import implied_volatility_vectorized
 import json
 import pandas as pd

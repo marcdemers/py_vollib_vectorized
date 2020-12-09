@@ -9,8 +9,6 @@ from py_vollib_vectorized.entrypoints import black_scholes_vectorized, black_sch
 
 from py_vollib_vectorized.entrypoints import get_all_greeks
 
-#TODO unit tests for broadcasting
-
 class Test(TestCase):
     def setUp(self) -> None:
         with open("test_data_py_vollib.json", "rb") as f:
@@ -272,3 +270,29 @@ class Test(TestCase):
         self.assertIsNone(assert_array_almost_equal(my_rhos, orig_rs))
         self.assertIsNone(assert_array_almost_equal(my_vegas, orig_vs))
         self.assertIsNone(assert_array_almost_equal(my_thetas, orig_ts))
+
+    def test_implied_volatility_broadcasting(self):
+        for i in range(6):
+            ivs = implied_volatility_vectorized(
+                price=np.repeat([0.10], 2) if i == 0 else 0.10,
+                S=np.repeat([30], 2) if i == 1 else 30,  # underlying asset price
+                K=np.repeat([30], 2) if i == 2 else 30,  # strike
+                t=np.repeat([10/365.], 2) if i == 3 else 10/365.,  # normalized days to expiration
+                r=np.repeat([0.05], 2) if i == 4 else 0.05,  # interest free rate
+                flag=np.repeat(["c"], 2) if i == 5 else "c",  # call or put
+                return_as="numpy"
+            )
+
+            self.assertTrue(ivs[0] == ivs[1])
+
+    def test_greeks_broadcasting(self):
+        for i in range(6):
+            greeks_dataframe = get_all_greeks(
+                sigma=np.repeat([0.10], 2) if i == 0 else 0.10,
+                S=np.repeat([30], 2) if i == 1 else 30,  # underlying asset price
+                K=np.repeat([30], 2) if i == 2 else 30,  # strike
+                t=np.repeat([10 / 365.], 2) if i == 3 else 10 / 365.,  # normalized days to expiration
+                r=np.repeat([0.05], 2) if i == 4 else 0.05,  # interest free rate
+                flag=np.repeat(["c"], 2) if i == 5 else "c",  # call or put
+                return_as="numpy"
+            )

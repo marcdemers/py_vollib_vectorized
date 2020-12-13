@@ -6,6 +6,8 @@ from .entrypoints import get_all_greeks
 from .entrypoints import delta as vectorized_delta, \
     gamma as vectorized_gamma, rho as vectorized_rho, vega as vectorized_vega, theta as vectorized_theta
 
+from .entrypoints import black_vectorized, black_scholes_vectorized, black_scholes_merton_vectorized
+
 # TODO the readme file
 
 class repr_partial(partial):
@@ -25,6 +27,8 @@ try:
     import py_vollib
 except ImportError:
     raise ImportError("You must have py_vollib installed to use this library.")
+
+#TODO override models like black and black scholes as well
 
 import py_vollib.black.implied_volatility
 

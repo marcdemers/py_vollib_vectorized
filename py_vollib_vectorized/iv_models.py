@@ -1,4 +1,4 @@
-from .jit_helper import maybe_jit
+from py_vollib_vectorized.util.jit_helper import maybe_jit
 
 
 import numpy as np

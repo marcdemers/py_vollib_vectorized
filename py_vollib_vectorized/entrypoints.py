@@ -8,6 +8,9 @@ from py_vollib.helpers.constants import FLOAT_MAX, MINUS_FLOAT_MAX
 from py_vollib.helpers.exceptions import PriceIsAboveMaximum, PriceIsBelowIntrinsic
 
 from .iv_models import implied_volatility_from_a_transformed_rational_guess, forward_price
+
+from .numerical_greeks import numerical_delta_black, numerical_theta_black, \
+    numerical_vega_black, numerical_rho_black, numerical_gamma_black
 from .numerical_greeks import numerical_delta_black_scholes, numerical_theta_black_scholes, \
     numerical_vega_black_scholes, numerical_rho_black_scholes, numerical_gamma_black_scholes
 from .numerical_greeks import numerical_delta_black_scholes_merton, numerical_theta_black_scholes_merton, \
@@ -125,7 +128,6 @@ def implied_volatility_vectorized(price, S, K, t, r, flag, q=None, on_error="war
     :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the implied volatility for each contract.
     """
     flag = _preprocess_flags(flag, dtype)
-    #TODO put flag in maybe format data everywhere
     price, S, K, t, r, flag = maybe_format_data_and_broadcast(price, S, K, t, r, flag, dtype=dtype)
     _validate_data(price, S, K, t, r, flag)
 
@@ -225,8 +227,22 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", retur
 
     if model == "black":
         b = 0
+        greeks = {
+            "delta": numerical_delta_black(flag, S, K, t, r, sigma, b),
+            "gamma": numerical_gamma_black(flag, S, K, t, r, sigma, b),
+            "theta": numerical_theta_black(flag, S, K, t, r, sigma, b),
+            "rho": numerical_rho_black(flag, S, K, t, r, sigma, b),
+            "vega": numerical_vega_black(flag, S, K, t, r, sigma, b)
+        }
     elif model == "black_scholes":
         b = r
+        greeks = {
+            "delta": numerical_delta_black_scholes(flag, S, K, t, r, sigma, b),
+            "gamma": numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b),
+            "theta": numerical_theta_black_scholes(flag, S, K, t, r, sigma, b),
+            "rho": numerical_rho_black_scholes(flag, S, K, t, r, sigma, b),
+            "vega": numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
+        }
     elif model == "black_scholes_merton":
         if q is None:
             raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
@@ -234,16 +250,17 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", retur
                                                                dtype=dtype)  # recheck to make sure q matches
         _validate_data(r, q)
         b = r - q
+        greeks = {
+            "delta": numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "gamma": numerical_gamma_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "theta": numerical_theta_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "rho": numerical_rho_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "vega": numerical_vega_black_scholes_merton(flag, S, K, t, r, sigma, b)
+        }
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
-    greeks = {
-        "delta": numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b),
-        "gamma": numerical_gamma_black_scholes_merton(flag, S, K, t, r, sigma, b),
-        "theta": numerical_theta_black_scholes_merton(flag, S, K, t, r, sigma, b),
-        "rho": numerical_rho_black_scholes_merton(flag, S, K, t, r, sigma, b),
-        "vega": numerical_vega_black_scholes_merton(flag, S, K, t, r, sigma, b)
-    }
+
 
     if return_as == "dataframe":
         return pd.DataFrame.from_dict(greeks)
@@ -275,7 +292,7 @@ def delta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
 
     if model == "black":
         b = 0
-        delta = numerical_delta_black_scholes(flag, S, K, t, r, sigma, b)
+        delta = numerical_delta_black(flag, S, K, t, r, sigma, b)
     elif model == "black_scholes":
         b = r
         delta = numerical_delta_black_scholes(flag, S, K, t, r, sigma, b)
@@ -323,7 +340,7 @@ def theta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
 
     if model == "black":
         b = 0
-        theta = numerical_theta_black_scholes(flag, S, K, t, r, sigma, b)
+        theta = numerical_theta_black(flag, S, K, t, r, sigma, b)
 
     elif model == "black_scholes":
         b = r
@@ -370,7 +387,7 @@ def vega(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="data
 
     if model == "black":
         b = 0
-        vega = numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
+        vega = numerical_vega_black(flag, S, K, t, r, sigma, b)
 
     elif model == "black_scholes":
         b = r
@@ -418,7 +435,7 @@ def rho(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataf
 
     if model == "black":
         b = 0
-        rho = numerical_rho_black_scholes(flag, S, K, t, r, sigma, b)
+        rho = numerical_rho_black(flag, S, K, t, r, sigma, b)
 
     elif model == "black_scholes":
         b = r
@@ -465,9 +482,8 @@ def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
 
     if model == "black":
         b = 0
-        # TODO for these models are we certain that black schoels behaves same as black? because in the call to numerical
         # black scholes, it calls the black_scholes function and not the black function.
-        gamma = numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b)
+        gamma = numerical_gamma_black(flag, S, K, t, r, sigma, b)
     elif model == "black_scholes":
         b = r
         gamma = numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b)

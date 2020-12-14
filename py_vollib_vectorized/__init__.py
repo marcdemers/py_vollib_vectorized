@@ -72,3 +72,17 @@ py_vollib.black_scholes_merton.greeks.numerical.gamma = repr_partial(vectorized_
 py_vollib.black_scholes_merton.greeks.numerical.rho = repr_partial(vectorized_rho, model="black_scholes_merton")
 py_vollib.black_scholes_merton.greeks.numerical.theta = repr_partial(vectorized_theta, model="black_scholes_merton")
 py_vollib.black_scholes_merton.greeks.numerical.vega = repr_partial(vectorized_vega, model="black_scholes_merton")
+
+
+## Models
+import py_vollib.black.black
+py_vollib.black.black = repr_partial(black_vectorized)
+
+import py_vollib.black_scholes.black_scholes
+py_vollib.black_scholes.black_scholes = repr_partial(black_scholes_vectorized)
+
+import py_vollib.black_scholes_merton.black_scholes_merton
+py_vollib.black_scholes_merton.black_scholes_merton = repr_partial(black_scholes_merton_vectorized)
+
+
+

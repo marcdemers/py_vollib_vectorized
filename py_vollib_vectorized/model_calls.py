@@ -12,7 +12,7 @@ small_t_expansion_of_normalized_black_threshold = 2 * SIXTEENTH_ROOT_DBL_EPSILON
 
 dS = .01
 
-from .jit_helper import maybe_jit
+from py_vollib_vectorized.util.jit_helper import maybe_jit
 
 
 @maybe_jit()

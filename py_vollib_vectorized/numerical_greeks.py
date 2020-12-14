@@ -1,10 +1,87 @@
 import numpy as np
 
-from .jit_helper import maybe_jit
-from .model_calls import black_scholes, black_scholes_merton
+from py_vollib_vectorized.util.jit_helper import maybe_jit
+from .model_calls import black, black_scholes, black_scholes_merton
 
 dS = .01
 
+#### BLACK
+
+@maybe_jit()
+def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+    deltas = []
+    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
+        if t == 0.0:
+            if F == K:
+                if flag > 0:  # call option
+                    delta = 0.5
+                if flag < 0:  # put option
+                    delta = -0.5
+            elif F > K:
+                if flag > 0:  # call option
+                    delta = 1.0
+                if flag < 0:  # put option
+                    delta = 0.0
+            else:
+                if flag > 0:  # call option
+                    delta = 0.0
+                if flag < 0:  # put option
+                    delta = -1.0
+        else:
+            delta = (black(flag, F + dS, K, t, r, sigma) - black(flag, F - dS, K, t, r, sigma)) / (
+                    2 * dS)
+        deltas.append(delta)
+    return np.array(deltas)
+
+
+@maybe_jit()
+def numerical_theta_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+    thetas = []
+    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
+        if t <= 1. / 365.:
+            theta = black(flag, F, K, 0.00001, r, sigma) - black(flag, F, K, t, r, sigma)
+        else:
+            theta = black(flag, F, K, t - 1. / 365., r, sigma) - black(flag, F, K, t, r, sigma)
+        thetas.append(theta)
+    return np.array(thetas)
+
+
+@maybe_jit()
+def numerical_vega_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+    vegas = []
+
+    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
+        vega = (black(flag, F, K, t, r, sigma + 0.01) - black(flag, F, K, t, r, sigma - 0.01)) / 2.
+        vegas.append(vega)
+    return np.array(vegas)
+
+
+@maybe_jit()
+def numerical_rho_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+    rhos = []
+
+    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
+        rho = (black(flag, F, K, t, r + 0.01, sigma) - black(flag, F, K, t, r - 0.01, sigma)) / 2.
+        rhos.append(rho)
+
+    return np.array(rhos)
+
+
+@maybe_jit()
+def numerical_gamma_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+    gammas = []
+
+    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
+        if t == 0:
+            gamma = np.inf if F == K else 0.0
+        else:
+            gamma = (black(flag, F + dS, K, t, r, sigma) - 2. * black(flag, F, K, t, r, sigma) + \
+                     black(flag, F - dS, K, t, r, sigma)) / dS ** 2.
+
+        gammas.append(gamma)
+    return np.array(gammas)
+
+#### BLACK SCHOLES
 
 @maybe_jit()
 def numerical_delta_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):

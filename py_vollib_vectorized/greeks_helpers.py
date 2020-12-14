@@ -2,7 +2,7 @@ import numpy as np
 from py_lets_be_rational.constants import *
 from py_lets_be_rational.normaldistribution import norm_cdf
 
-from .jit_helper import maybe_jit
+from py_vollib_vectorized.util.jit_helper import maybe_jit
 
 
 # @maybe_jit(cache=True, nopython=True, nogil=True)

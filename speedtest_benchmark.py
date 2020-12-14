@@ -20,8 +20,6 @@ data_repeated = data_repeated.sample(frac=1)  # shuffle
 data_repeated[["Px", "MidPx", "Strike", "Interest Free Rate", "Annualized Time To Expiration"]] = \
     data_repeated[["Px", "MidPx", "Strike", "Interest Free Rate", "Annualized Time To Expiration"]].abs()
 
-from py_vollib_vectorized.jit_helper import use_jit, use_cache, force_nopython
-
 import time
 
 times = []

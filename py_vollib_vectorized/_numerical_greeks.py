@@ -1,12 +1,13 @@
 import numpy as np
 
 from py_vollib_vectorized.util.jit_helper import maybe_jit
-from .model_calls import black, black_scholes, black_scholes_merton
+from ._model_calls import black, black_scholes, black_scholes_merton
 
 dS = .01
 
 #### BLACK
 
+#TODO this function is broken
 @maybe_jit()
 def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas, bs):
     deltas = []

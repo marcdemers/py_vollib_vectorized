@@ -126,11 +126,11 @@ def vectorized(N):
     import py_vollib_vectorized
 
     tt = big_test_df.iloc[:N]
-    prices = py_vollib_vectorized.black_scholes_vectorized(tt["flag"], tt["S"], tt["K"], tt["t"],
+    prices = py_vollib_vectorized.vectorized_black_scholes(tt["flag"], tt["S"], tt["K"], tt["t"],
                                                            tt["R"], tt["v"])
 
     tt["price"] = prices
-    py_vollib_vectorized.implied_volatility_vectorized(tt["price"], tt["S"], tt["K"], tt["t"], tt["R"],
+    py_vollib_vectorized.vectorized_implied_volatility(tt["price"], tt["S"], tt["K"], tt["t"], tt["R"],
                                                        tt["flag"])
 
 
@@ -155,5 +155,5 @@ plt.title("Time required to price 1 million contracts (capped at 60s, avg. over 
 plt.xlabel("Number of contracts")
 plt.ylabel("Time (s)")
 plt.tight_layout()
-plt.savefig("docs/_static/benchmark.png")
+plt.savefig("./benchmark.png")
 plt.show()

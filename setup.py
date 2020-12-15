@@ -11,7 +11,7 @@ with io.open(os.path.join(dir, 'README.md'), encoding='utf-8') as f:
 
 setup(name='py_vollib_vectorized',
       version='0.1',
-      description='A fast, vectorized approach to calculating Implied Volatility and Greeks using the Black, Black-Scholes and Black-Scholes-Merton pricing models.',
+      description='A fast, vectorized approach to calculating Implied Volatility and Greeks using the Black, Black-Scholes and Black-Scholes-Merton pricing pkg_ref.',
       long_description=long_description,
       long_description_content_type='text_markdown',
       url='https://github.com/marcdemers/py_vollib_vectorized',

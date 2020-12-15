@@ -1,6 +1,9 @@
 from numba import jit
 
-from py_vollib_vectorized.config import use_cache, use_jit, force_nopython
+use_jit = True
+force_nopython = True
+use_cache = True
+
 
 def maybe_jit(*jit_args, **jit_kwargs):
     # global use_jit, force_nopython, use_cache

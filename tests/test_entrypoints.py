@@ -3,11 +3,11 @@ import json
 import pandas as pd, numpy as np
 from numpy.testing import assert_array_almost_equal
 
-from py_vollib_vectorized.entrypoints import implied_volatility_vectorized
+from py_vollib_vectorized.implied_volatility import vectorized_implied_volatility
 
-from py_vollib_vectorized.entrypoints import black_scholes_vectorized, black_scholes_merton_vectorized
+from py_vollib_vectorized.models import vectorized_black_scholes, vectorized_black_scholes_merton
 
-from py_vollib_vectorized.entrypoints import get_all_greeks
+from py_vollib_vectorized.api import get_all_greeks
 
 class Test(TestCase):
     def setUp(self) -> None:
@@ -23,8 +23,8 @@ class Test(TestCase):
 
     def test_implied_volatility_vectorized(self):
         # Call
-        ivs = implied_volatility_vectorized(
-            price=black_scholes_vectorized(self.test_df_calls["flag"],
+        ivs = vectorized_implied_volatility(
+            price=vectorized_black_scholes(self.test_df_calls["flag"],
                                            self.test_df_calls["S"],
                                            self.test_df_calls["K"],
                                            self.test_df_calls["t"],
@@ -46,8 +46,8 @@ class Test(TestCase):
 
         # Put
 
-        ivs = implied_volatility_vectorized(
-            price=black_scholes_vectorized(self.test_df_puts["flag"],
+        ivs = vectorized_implied_volatility(
+            price=vectorized_black_scholes(self.test_df_puts["flag"],
                                            self.test_df_puts["S"],
                                            self.test_df_puts["K"],
                                            self.test_df_puts["t"],
@@ -68,7 +68,7 @@ class Test(TestCase):
         self.assertTrue(all(test_array))
 
     def test_black_scholes_vectorized(self):
-        prices = black_scholes_vectorized(
+        prices = vectorized_black_scholes(
             sigma=self.test_df_calls["v"].values,  # current option price
             S=self.test_df_calls["S"].values,  # underlying asset price
             K=self.test_df_calls["K"].values,  # strike
@@ -81,7 +81,7 @@ class Test(TestCase):
         self.assertIsNone(
             assert_array_almost_equal(self.test_df_calls["bs_call"].values.ravel(), prices.values.ravel()))
 
-        prices = black_scholes_vectorized(
+        prices = vectorized_black_scholes(
             sigma=self.test_df_puts["v"].values,  # current option price
             S=self.test_df_puts["S"].values,  # underlying asset price
             K=self.test_df_puts["K"].values,  # strike
@@ -94,7 +94,7 @@ class Test(TestCase):
         self.assertIsNone(assert_array_almost_equal(self.test_df_puts["bs_put"].values.ravel(), prices.values.ravel()))
 
     def test_black_scholes_merton_vectorized(self):
-        prices = black_scholes_merton_vectorized(
+        prices = vectorized_black_scholes_merton(
             sigma=self.test_df_calls["v"].values,  # current option price
             S=self.test_df_calls["S"].values,  # underlying asset price
             K=self.test_df_calls["K"].values,  # strike
@@ -108,7 +108,7 @@ class Test(TestCase):
         self.assertIsNone(
             assert_array_almost_equal(self.test_df_calls["bs_call"].values.ravel(), prices.values.ravel()))
 
-        prices = black_scholes_merton_vectorized(
+        prices = vectorized_black_scholes_merton(
             sigma=self.test_df_puts["v"].values,  # current option price
             S=self.test_df_puts["S"].values,  # underlying asset price
             K=self.test_df_puts["K"].values,  # strike
@@ -152,7 +152,7 @@ class Test(TestCase):
         self.assertIsNone(assert_array_almost_equal(greeks_dataframe["vega"], self.test_df_puts["PV"] * .01, decimal=3))
 
     def test_validity_greeks(self):
-        from py_vollib_vectorized.entrypoints import delta as my_delta, theta as my_theta, gamma as my_gamma, \
+        from py_vollib_vectorized.greeks import delta as my_delta, theta as my_theta, gamma as my_gamma, \
             rho as my_rho, \
             vega as my_vega
 
@@ -160,7 +160,7 @@ class Test(TestCase):
             rho as original_rho, theta as original_theta, vega as original_vega
 
         data = pd.read_csv("../fake_data.csv")
-        ivs = implied_volatility_vectorized(
+        ivs = vectorized_implied_volatility(
             price=data["MidPx"].values,  # current option price
             S=data["Px"].values,  # underlying asset price
             K=data["Strike"].values,  # strike
@@ -273,7 +273,7 @@ class Test(TestCase):
 
     def test_implied_volatility_broadcasting(self):
         for i in range(6):
-            ivs = implied_volatility_vectorized(
+            ivs = vectorized_implied_volatility(
                 price=np.repeat([0.10], 2) if i == 0 else 0.10,
                 S=np.repeat([30], 2) if i == 1 else 30,  # underlying asset price
                 K=np.repeat([30], 2) if i == 2 else 30,  # strike

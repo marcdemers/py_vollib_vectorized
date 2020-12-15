@@ -1,5 +1,6 @@
 # py_vollib_vectorized
 
+
 ## Introduction
 
 The `py_vollib_vectorized` package makes pricing thousands of option contracts and calculating greeks fast and effortless.
@@ -8,8 +9,6 @@ Upon import, it will automatically patch the corresponding `py_vollib` functions
 Inputs can then be passed as `numpy.array`, `pandas.Series` or `pandas.DataFrame`.
 
 On top of vectorization, modifications to py_vollib include additional `numba` speedups; as such, `numba` *is* required.
-
-Users should refer to the `py_vollib` documentation for definitions and signature.
 
 ## Installation
 
@@ -66,10 +65,11 @@ greeks = get_all_greeks(flag, S, K, t, r, iv, return_as='dataframe')
 
 ```
 
-See the examples folder for detailed functionality. 
-
 ## Benchmarking
 
+Compared to looping through contracts or to using built-in pandas functionality, this library is very memory efficient and scales fast and well to a large number of contracts.
+
+![Performance of the py_vollib_vectorized libary](Isolated.png "Title")
 
 
 ## Acknowledgements

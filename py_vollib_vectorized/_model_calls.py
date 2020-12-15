@@ -2,7 +2,7 @@ import numpy as np
 from py_lets_be_rational.constants import *
 from py_lets_be_rational.rationalcubic import *
 
-from .greeks_helpers import _asymptotic_expansion_of_normalized_black_call, _normalised_intrinsic_call, \
+from py_vollib_vectorized.util.greeks_helpers import _asymptotic_expansion_of_normalized_black_call, _normalised_intrinsic_call, \
     _small_t_expansion_of_normalized_black_call, _normalized_black_call_using_norm_cdf, \
     _normalised_black_call_using_erfcx
 

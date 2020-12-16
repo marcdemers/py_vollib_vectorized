@@ -159,7 +159,7 @@ class Test(TestCase):
         from py_vollib.black_scholes.greeks.numerical import delta as original_delta, gamma as original_gamma, \
             rho as original_rho, theta as original_theta, vega as original_vega
 
-        data = pd.read_csv("../fake_data.csv")
+        data = pd.read_csv("fake_data.csv")
         ivs = vectorized_implied_volatility(
             price=data["MidPx"].values,  # current option price
             S=data["Px"].values,  # underlying asset price

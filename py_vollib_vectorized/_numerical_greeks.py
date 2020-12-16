@@ -7,11 +7,11 @@ dS = .01
 
 #### BLACK
 
-#TODO this function is broken
+#TODO the black greek functions are broken, missing the b=0
 @maybe_jit()
-def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas):
     deltas = []
-    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
+    for flag, F, K, t, r, sigma in zip(flags, Fs, Ks, ts, rs, sigmas):
         if t == 0.0:
             if F == K:
                 if flag > 0:  # call option
@@ -29,39 +29,40 @@ def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas, bs):
                 if flag < 0:  # put option
                     delta = -1.0
         else:
-            delta = (black(flag, F + dS, K, t, r, sigma) - black(flag, F - dS, K, t, r, sigma)) / (
+            delta = (black(F+dS, K, sigma, t, flag) - black(F - dS, K, sigma, t, flag)) / (
                     2 * dS)
         deltas.append(delta)
     return np.array(deltas)
 
 
 @maybe_jit()
-def numerical_theta_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+def numerical_theta_black(flags, Fs, Ks, ts, rs, sigmas):
     thetas = []
-    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
+    for flag, F, K, t, r, sigma in zip(flags, Fs, Ks, ts, rs, sigmas):
         if t <= 1. / 365.:
-            theta = black(flag, F, K, 0.00001, r, sigma) - black(flag, F, K, t, r, sigma)
+            theta = black(F, K, sigma, 0.00001, flag) - black(F, K, sigma, t, flag)
         else:
-            theta = black(flag, F, K, t - 1. / 365., r, sigma) - black(flag, F, K, t, r, sigma)
+            theta = black(F, K, sigma, t - 1./365., flag) - black(F, K, sigma, t, flag)
         thetas.append(theta)
     return np.array(thetas)
 
 
 @maybe_jit()
-def numerical_vega_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+def numerical_vega_black(flags, Fs, Ks, ts, rs, sigmas):
     vegas = []
 
-    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
-        vega = (black(flag, F, K, t, r, sigma + 0.01) - black(flag, F, K, t, r, sigma - 0.01)) / 2.
+    for flag, F, K, t, r, sigma in zip(flags, Fs, Ks, ts, rs, sigmas):
+        vega = (black(F, K, sigma + 0.01, t, flag) - black(F, K, sigma - 0.01, t, flag)) / 2.
         vegas.append(vega)
     return np.array(vegas)
 
 
 @maybe_jit()
-def numerical_rho_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+def numerical_rho_black(flags, Fs, Ks, ts, rs, sigmas):
     rhos = []
 
-    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
+    for flag, F, K, t, r, sigma in zip(flags, Fs, Ks, ts, rs, sigmas):
+        black(F, K, sigma. t, flag)
         rho = (black(flag, F, K, t, r + 0.01, sigma) - black(flag, F, K, t, r - 0.01, sigma)) / 2.
         rhos.append(rho)
 
@@ -69,10 +70,10 @@ def numerical_rho_black(flags, Fs, Ks, ts, rs, sigmas, bs):
 
 
 @maybe_jit()
-def numerical_gamma_black(flags, Fs, Ks, ts, rs, sigmas, bs):
+def numerical_gamma_black(flags, Fs, Ks, ts, rs, sigmas):
     gammas = []
 
-    for flag, F, K, t, r, sigma, b in zip(flags, Fs, Ks, ts, rs, sigmas, bs):
+    for flag, F, K, t, r, sigma in zip(flags, Fs, Ks, ts, rs, sigmas):
         if t == 0:
             gamma = np.inf if F == K else 0.0
         else:

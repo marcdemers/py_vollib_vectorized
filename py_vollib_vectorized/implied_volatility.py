@@ -5,8 +5,7 @@ import pandas as pd
 from ._iv_models import implied_volatility_from_a_transformed_rational_guess, forward_price
 from .util.data_format import _preprocess_flags, maybe_format_data_and_broadcast, _validate_data, _check_below_and_above_intrinsic, _check_minus_above_float
 
-#TODO make the keywords args mandatory with *
-def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, on_error="warn",
+def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, *, on_error="warn",
                                   model="black_scholes", return_as="dataframe",
                                   dtype=np.float64, **kwargs):
     """
@@ -90,7 +89,7 @@ def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, on_error="war
     return sigma_calc
 
 
-def vectorized_implied_volatility_black(price, F, K, r, t, flag, on_error="warn", return_as="dataframe",
+def vectorized_implied_volatility_black(price, F, K, r, t, flag, *, on_error="warn", return_as="dataframe",
                                         dtype=np.float64, **kwargs):
     """
     An extremely fast, efficient and accurate Implied Volatility calculator for option/future contracts.

@@ -12,7 +12,7 @@ On top of vectorization, modifications to py_vollib include additional `numba` s
 
 ## Installation
 
-    pip install fast_py_vollib
+    pip install py_vollib_vectorized
     
 ## Requirements
 
@@ -25,6 +25,9 @@ On top of vectorization, modifications to py_vollib include additional `numba` s
 
 ```python
 # The usual py_vollib syntax
+
+import numpy as np
+import pandas as pd
 
 from py_vollib.black_scholes import black_scholes
 flag = 'c'  # 'c' for call, 'p' for put
@@ -44,26 +47,35 @@ option_price = black_scholes(flag, S, K, t, r, iv)  # 12.111581435
 # Patch the original py_vollib library by importing py_vollib_vectorized
 import py_vollib_vectorized  # The same functions now accept vectors as input!
 
+# Note that the input arguments are broadcasted.
+# You can specify ints, floats, tuples, lists, numpy arrays or Series.
+
 flag = ['c', 'p']  # 'c' for call, 'p' for put
-S = [100, 100]  # Underlying asset prices
-K = [90, 90]  # Strikes
-t = [0.5, 0.5]  # (Annualized) times-to-expiration
-r = [0.01, 0.01]  # Interest free rates
-iv = [0.2, 0.2]  # Implied Volatilities
+S = (100, 100)  # Underlying asset prices
+K = [90]  # Strikes
+t = pd.Series([0.5, 0.6])  # (Annualized) times-to-expiration
+r = np.array([0.01])  # Interest free rates
+iv = 0.2  # Implied Volatilities
 
-option_price = black_scholes(flag, S, K, t, r, iv, return_as="array")  # array([12.111581435, 1.66270456231])
+option_price = black_scholes(flag, S, K, t, r, iv, return_as='array')  
+# array([12.111581435, 1.66270456231])
 
-# TODO example with get_all_greeks
 
 # We also define other utility functions to get all contract greeks in one call.
 
 from py_vollib_vectorized import get_all_greeks
 
-greeks = get_all_greeks(flag, S, K, t, r, iv, return_as='dataframe')
+greeks = get_all_greeks(flag, S, K, t, r, iv, model='black_scholes', return_as='dict')
 
-# greeks: 
+#   {'delta': array([ 0.80263679, -0.21293214]),
+#    'gamma': array([0.0196385, 0.01875498]),
+#    'theta': array([-0.01263557, -0.00964498]),
+#    'rho': array([0.34073321, -0.13994668]),
+#    'vega': array([0.19626478, 0.22493816])}
 
 ```
+
+See the documentation and the tests directory for more details on calculating IV, option prices, or greeks.
 
 ## Benchmarking
 

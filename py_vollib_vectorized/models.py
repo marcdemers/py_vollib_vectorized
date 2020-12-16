@@ -5,7 +5,7 @@ from ._model_calls import _black_scholes_merton_vectorized_call, _black_vectoriz
 from .util.data_format import _preprocess_flags, maybe_format_data_and_broadcast, _validate_data
 
 
-def vectorized_black(flag, F, K, t, r, sigma, return_as="dataframe", dtype=np.float64):
+def vectorized_black(flag, F, K, t, r, sigma, *, return_as="dataframe", dtype=np.float64):
     """
     Price a Future option using the Black model.
     Broadcasting is applied on the inputs.
@@ -42,7 +42,7 @@ def vectorized_black(flag, F, K, t, r, sigma, return_as="dataframe", dtype=np.fl
     return np.array(prices)
 
 
-def vectorized_black_scholes(flag, S, K, t, r, sigma, return_as="dataframe", dtype=np.float64):
+def vectorized_black_scholes(flag, S, K, t, r, sigma, *, return_as="dataframe", dtype=np.float64):
     """
     Price an option using the Black-Scholes model.
     Broadcasting is applied on the inputs.
@@ -80,7 +80,7 @@ def vectorized_black_scholes(flag, S, K, t, r, sigma, return_as="dataframe", dty
     return np.array(prices)
 
 
-def vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q, return_as="dataframe", dtype=np.float64):
+def vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q, *, return_as="dataframe", dtype=np.float64):
     """
     Price an option using the Black-Scholes-Merton model.
     Broadcasting is applied on the inputs.

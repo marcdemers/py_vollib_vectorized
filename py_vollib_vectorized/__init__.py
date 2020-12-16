@@ -11,7 +11,6 @@ from .models import vectorized_black, vectorized_black_scholes, vectorized_black
 
 # TODO the readme file
 #TODO AOT compilation and remove dependency on numba
-#todo repr partial arguments of function, verify for vectorized_black for instance
 class repr_partial(partial):
     def __repr__(self):
         return "Vectorized <{fn}({args}{kwargs})>".format(fn=self.func.__name__,
@@ -29,8 +28,6 @@ try:
     import py_vollib
 except ImportError:
     raise ImportError("You must have py_vollib installed to use this library.")
-
-#TODO override pkg_ref like black and black scholes as well
 
 import py_vollib.black.implied_volatility
 
@@ -75,8 +72,7 @@ py_vollib.black_scholes_merton.greeks.numerical.rho = repr_partial(vectorized_rh
 py_vollib.black_scholes_merton.greeks.numerical.theta = repr_partial(vectorized_theta, model="black_scholes_merton")
 py_vollib.black_scholes_merton.greeks.numerical.vega = repr_partial(vectorized_vega, model="black_scholes_merton")
 
-#TODO
-## pkg_ref
+## models
 import py_vollib.black
 py_vollib.black.black = repr_partial(vectorized_black)
 

@@ -9,7 +9,7 @@ from ._numerical_greeks import numerical_delta_black_scholes_merton, numerical_t
     numerical_vega_black_scholes_merton, numerical_rho_black_scholes_merton, numerical_gamma_black_scholes_merton
 from .util.data_format import _preprocess_flags, maybe_format_data_and_broadcast, _validate_data
 
-def delta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
+def delta(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="dataframe", dtype=np.float64):
     """
     Return the delta of a contract, as specified by the pricing model `model`.
     Broadcasting is applied on the inputs.
@@ -67,7 +67,7 @@ def delta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     return delta
 
 
-def theta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
+def theta(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as="dataframe", dtype=np.float64):
     """
     Return the theta of a contract, as specified by the pricing model `model`.
     Broadcasting is applied on the inputs.
@@ -124,7 +124,7 @@ def theta(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dat
     return theta
 
 
-def vega(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
+def vega(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="dataframe", dtype=np.float64):
     """
     Return the vega of a contract, as specified by the pricing model `model`.
     Broadcasting is applied on the inputs.
@@ -181,7 +181,7 @@ def vega(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="data
     return vega
 
 
-def rho(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
+def rho(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="dataframe", dtype=np.float64):
     """
     Return the rho of a contract, as specified by the pricing model `model`.
     Broadcasting is applied on the inputs.
@@ -239,7 +239,7 @@ def rho(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataf
     return rho
 
 
-def gamma(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
+def gamma(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as="dataframe", dtype=np.float64):
     """
     Return the gamma of a contract, as specified by the pricing model `model`.
     Broadcasting is applied on the inputs.

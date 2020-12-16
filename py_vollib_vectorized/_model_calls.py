@@ -17,14 +17,6 @@ from py_vollib_vectorized.util.jit_helper import maybe_jit
 
 @maybe_jit()
 def normalised_black_call(x, s):
-    """
-    :param x:
-    :type x: float
-    :param s:
-    :type x: float
-    :return:
-    :rtype: float
-    """
     if x > 0:
         return _normalised_intrinsic_call(x) + normalised_black_call(-x, s)
     ax = np.abs(x)
@@ -55,55 +47,14 @@ def normalised_black(x, s, q):
     return normalised_black_call(-x if q < 0 else x, s)  # Reciprocal-strike call-put equivalence
 
 
-# TODO needs simplifcation
 @maybe_jit()
 def undiscounted_black(F, K, sigma, t, flag):
-    """Calculate the **undiscounted** Black option price.
-    :param F: underlying futures price
-    :type F: float
-    :param K: strike price
-    :type K: float
-    :param sigma: annualized standard deviation, or volatility
-    :type sigma: float
-    :param t: time to expiration in years
-    :type t: float
-    >>> F = 100
-    >>> K = 100
-    >>> sigma = .2
-    >>> flag = 'c'
-    >>> t = .5
-    # >>> undiscounted_black(F, K, sigma, t, flag)
-    5.637197779701664
-
-    """
     q = flag
     return black(F, K, sigma, t, q)
 
 
 @maybe_jit()
 def black_scholes(flag, S, K, t, r, sigma):
-    """Return the Black-Scholes option price.
-    :param S: underlying asset price
-    :type S: float
-    :param K: strike price
-    :type K: float
-    :param sigma: annualized standard deviation, or volatility
-    :type sigma: float
-    :param t: time to expiration in years
-    :type t: float
-    :param r: risk-free interest rate
-    :type r: float
-    :param flag: 'c' or 'p' for call or put.
-    :type flag: str
-
-
-    >>> c = black_scholes('c',100,90,.5,.01,.2)
-    >>> abs(c - 12.111581435) < .000001
-    True
-    >>> p = black_scholes('p',100,90,.5,.01,.2)
-    >>> abs(p - 1.66270456231) < .000001
-    True
-    """
     deflater = np.exp(-r * t)
     F = S / deflater
     return undiscounted_black(F, K, sigma, t, flag) * deflater
@@ -111,33 +62,6 @@ def black_scholes(flag, S, K, t, r, sigma):
 
 @maybe_jit()
 def black_scholes_merton(flag, S, K, t, r, sigma, q):
-    """Return the Black-Scholes-Merton option price.
-    :param S: underlying asset price
-    :type S: float
-    :param K: strike price
-    :type K: float
-    :param sigma: annualized standard deviation, or volatility
-    :type sigma: float
-    :param t: time to expiration in years
-    :type t: float
-    :param r: risk-free interest rate
-    :type r: float
-    :param q: annualized continuous dividend rate
-    :type q: float
-    From Espen Haug, The Complete Guide To Option Pricing Formulas
-    Page 4
-    >>> S=100
-    >>> K=95
-    >>> q=.05
-    >>> t = 0.5
-    >>> r = 0.1
-    >>> sigma = 0.2
-    >>> p_published_value = 2.4648
-    >>> p_calc = black_scholes_merton('p', S, K, t, r, sigma, q)
-    >>> abs(p_published_value - p_calc) < 0.0001
-    True
-    """
-
     F = S * np.exp((r - q) * t)
     deflater = np.exp(-r * t)
     return black(F, K, sigma, t, flag) * deflater
@@ -145,20 +69,6 @@ def black_scholes_merton(flag, S, K, t, r, sigma, q):
 
 @maybe_jit()
 def black(F, K, sigma, T, q):
-    """
-    :param F:
-    :type F: float
-    :param K:
-    :type K: float
-    :param sigma:
-    :type sigma: float
-    :param T:
-    :type T: float
-    :param q: q=±1
-    :type q: float
-    :return:
-    :rtype: float
-    """
     intrinsic = np.abs(np.maximum((K - F if q < 0 else F - K), 0.0))
     # Map in-the-money to out-of-the-money
     if q * (F - K) > 0:

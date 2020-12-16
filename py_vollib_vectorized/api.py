@@ -12,7 +12,7 @@ from ._numerical_greeks import numerical_delta_black_scholes_merton, numerical_t
 from .util.data_format import _preprocess_flags, maybe_format_data_and_broadcast, _validate_data
 
 
-def get_all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", return_as="dataframe", dtype=np.float64):
+def get_all_greeks(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as="dataframe", dtype=np.float64):
     """
     Utility function that returns all contract greeks, as specified by the pricing model `model`.
     Broadcasting is applied on the inputs.
@@ -46,13 +46,13 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, model="black_scholes", retur
     _validate_data(flag, S, K, t, r, sigma)
 
     if model == "black":
-        b = 0
+        b = r - r
         greeks = {
-            "delta": numerical_delta_black(flag, S, K, t, r, sigma, b),
-            "gamma": numerical_gamma_black(flag, S, K, t, r, sigma, b),
-            "theta": numerical_theta_black(flag, S, K, t, r, sigma, b),
-            "rho": numerical_rho_black(flag, S, K, t, r, sigma, b),
-            "vega": numerical_vega_black(flag, S, K, t, r, sigma, b)
+            "delta": numerical_delta_black_scholes(flag, S, K, t, r, sigma, b),
+            "gamma": numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b),
+            "theta": numerical_theta_black_scholes(flag, S, K, t, r, sigma, b),
+            "rho": numerical_rho_black_scholes(flag, S, K, t, r, sigma, b),
+            "vega": numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
         }
     elif model == "black_scholes":
         b = r

@@ -15,7 +15,7 @@ def vectorized_black(flag, F, K, t, r, sigma, *, return_as="dataframe", dtype=np
     :param sigma: The Implied Volatility (as a decimal, i.e. 0.10 for 10%).
     :param t: The annualized time to expiration. Must be positive. For small TTEs, use a small value (1e-3).
     :param flag: For each contract, this should be specified as `c` for a call option and `p` for a put option.
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use "dataframe". Any other value will return a `numpy.array` object.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: The price of the option.
     >>> from py_vollib.black import black
@@ -53,7 +53,7 @@ def vectorized_black_scholes(flag, S, K, t, r, sigma, *, return_as="dataframe", 
     :param t: The annualized time to expiration. Must be positive. For small TTEs, use a small value (1e-3).
     :param r: The interest free rate.
     :param sigma: The Implied Volatility (as a decimal, i.e. 0.10 for 10%).
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use "dataframe". Any other value will return a `numpy.array` object.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: The price of the option.
     >>> from py_vollib.black_scholes import black_scholes
@@ -92,7 +92,7 @@ def vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q, *, return_as="da
     :param r: The interest free rate.
     :param sigma: The Implied Volatility (as a decimal, i.e. 0.10 for 10%).
     :param q: The annualized continuous dividend yield.
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use "dataframe". Any other value will return a `numpy.array` object.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: The price of the option.
     >>> from py_vollib.black_scholes_merton import black_scholes_merton

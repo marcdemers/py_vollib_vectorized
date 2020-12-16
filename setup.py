@@ -37,7 +37,6 @@ setup(name='py_vollib_vectorized',
           'Topic :: Office/Business :: Financial',
           'Topic :: Office/Business :: Financial :: Investment',
       ],
-      # url='https://www.python.org/sigs/distutils-sig/',
-      install_requires=['py_vollib', 'numba', 'py_lets_be_rational', 'numpy', 'pandas', 'scipy'],
+      install_requires=['py_vollib', 'numba>=0.47.0', 'py_lets_be_rational', 'numpy', 'pandas', 'scipy'],
       packages=find_packages()
       )

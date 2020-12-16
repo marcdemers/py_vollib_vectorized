@@ -10,7 +10,7 @@ def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, *, on_error="
                                   dtype=np.float64, **kwargs):
     """
     An extremely fast, efficient and accurate Implied Volatility calculator for option/future contracts.
-    Inputs can be lists, tuples, floats, `pandas.Series`, or `numpy.arrays`.
+    Inputs can be lists, tuples, floats, :obj:`pd.Series`, or `numpy.arrays`.
     Broadcasting is applied on the inputs.
 
     :param price: The price of the option.
@@ -22,10 +22,10 @@ def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, *, on_error="
     :param q: The annualized continuous dividend yield.
     :param on_error: Either "raise", "warn" or "ignore".
     :param model: Must be one of "black_scholes" or "black_scholes_merton". Use `vectorized_implied_volatility_black` for the Black model.
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use "dataframe". Any other value will return a `numpy.array` object.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :param kwargs: Other keyword arguments are ignored.
-    :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the implied volatility for each contract.
+    :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the implied volatility for each contract.
     >>> from py_vollib.black_scholes_merton.implied_volatility import implied_volatility
     >>> import py_vollib_vectorized
     >>> price = 0.10
@@ -45,6 +45,7 @@ def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, *, on_error="
 
     deflater = np.exp(-r * t)
 
+    #TODO expand this to models and greeks?
     if np.any(deflater == 0) and on_error != "ignore":
         if on_error == "warn":
             warnings.warn(
@@ -93,7 +94,7 @@ def vectorized_implied_volatility_black(price, F, K, r, t, flag, *, on_error="wa
                                         dtype=np.float64, **kwargs):
     """
     An extremely fast, efficient and accurate Implied Volatility calculator for option/future contracts.
-    Inputs can be lists, tuples, floats, `pandas.Series`, or `numpy.arrays`.
+    Inputs can be lists, tuples, floats, :obj:`pd.Series`, or `numpy.arrays`.
     Broadcasting is applied on the inputs.
     This method should only be used in the black model of pricing.
     Argument order is kept consistent with that of the `py_vollib` package.
@@ -105,11 +106,11 @@ def vectorized_implied_volatility_black(price, F, K, r, t, flag, *, on_error="wa
     :param r: The Interest Free Rate.
     :param flag: For each contract, this should be specified as `c` for a call option and `p` for a put option.
     :param on_error: Either "raise", "warn" or "ignore".
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use
-    "dataframe". Any other value will return a `numpy.array` object.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use
+    "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :param kwargs: Other keyword arguments are ignored.
-    :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the implied volatility for each contract.
+    :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the implied volatility for each contract.
     >>> from py_vollib.black.implied_volatility import implied_volatility
     >>> import py_vollib_vectorized
     >>> price = 0.10

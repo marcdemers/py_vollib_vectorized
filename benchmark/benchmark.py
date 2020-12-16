@@ -151,9 +151,9 @@ df = pd.DataFrame(timings, columns=["N", "apply", "forloop", "iterrows", "listco
 g = sns.lineplot(data=df.melt(id_vars="N", var_name="method"), x="N", y="value", hue="method", markers=True)
 g.set_xscale("log")
 
-plt.title("Time required to price 1 million contracts (capped at 60s, avg. over 10 runs)")
+plt.title("Time required to price up to 10 million contracts\n(capped at 60s, avg. over 10 runs)")
 plt.xlabel("Number of contracts")
 plt.ylabel("Time (s)")
 plt.tight_layout()
-plt.savefig("./benchmark.png")
+plt.savefig("docs/_static/benchmark.png")
 plt.show()

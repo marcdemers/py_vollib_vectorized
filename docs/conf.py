@@ -12,13 +12,14 @@
 #
 import os
 import sys
+import datetime
 sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'py_vollib_vectorized'
-copyright = '2020, Marc Demers'
+copyright = '{}, Marc Demers'.format(datetime.datetime.now().year)
 author = 'Marc Demers'
 
 # The full version, including alpha/beta/rc tags
@@ -48,6 +49,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+
+html_theme_options = {
+    'collapse_navigation': True,
+    'display_version': True,
+    'prev_next_buttons_location': 'both',
+    'style_external_link': True
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

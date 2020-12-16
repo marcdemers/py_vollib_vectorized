@@ -21,10 +21,10 @@ def delta(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="
     :param r: The Interest Free Rate.
     :param sigma: The Implied Volatility.
     :param q: The annualized continuous dividend yield.
-    :param model: Must be one of "black", "black_scholes" or "black_scholes_merton".
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use "dataframe". Any other value will return a `numpy.array` object.
+    :param model: Must be one of 'black', 'black_scholes' or 'black_scholes_merton'.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
-    :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the delta for each contract.
+    :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the delta for each contract.
     >>> from py_vollib.black_scholes.greeks.numerical import delta
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
@@ -79,10 +79,10 @@ def theta(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
     :param r: The Interest Free Rate.
     :param sigma: The Implied Volatility.
     :param q: The annualized continuous dividend yield.
-    :param model: Must be one of "black", "black_scholes" or "black_scholes_merton".
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use "dataframe". Any other value will return a `numpy.array` object.
+    :param model: Must be one of 'black', 'black_scholes' or 'black_scholes_merton'.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
-    :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the theta for each contract.
+    :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the theta for each contract.
     >>> from py_vollib.black_scholes.greeks.numerical import theta
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
@@ -136,10 +136,10 @@ def vega(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="d
     :param r: The Interest Free Rate.
     :param sigma: The Implied Volatility.
     :param q: The annualized continuous dividend yield.
-    :param model: Must be one of "black", "black_scholes" or "black_scholes_merton".
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use "dataframe". Any other value will return a `numpy.array` object.
+    :param model: Must be one of 'black', 'black_scholes' or 'black_scholes_merton'.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
-    :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the vega for each contract.
+    :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the vega for each contract.
     >>> from py_vollib.black_scholes.greeks.numerical import vega
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
@@ -193,10 +193,10 @@ def rho(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="da
     :param r: The Interest Free Rate.
     :param sigma: The Implied Volatility.
     :param q: The annualized continuous dividend yield.
-    :param model: Must be one of "black", "black_scholes" or "black_scholes_merton".
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use "dataframe". Any other value will return a `numpy.array` object.
+    :param model: Must be one of 'black', 'black_scholes' or 'black_scholes_merton'.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
-    :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the rho for each contract.
+    :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the rho for each contract.
     >>> from py_vollib.black_scholes.greeks.numerical import rho
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
@@ -251,10 +251,10 @@ def gamma(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
     :param r: The Interest Free Rate.
     :param sigma: The Implied Volatility.
     :param q: The annualized continuous dividend yield.
-    :param model: Must be one of "black", "black_scholes" or "black_scholes_merton".
-    :param return_as: To return as a `pandas.Series` object, use "series". To return as a `pd.DataFrame` object, use "dataframe". Any other value will return a `numpy.array` object.
+    :param model: Must be one of 'black', 'black_scholes' or 'black_scholes_merton'.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
-    :return: `pd.Series`, `pd.DataFrame` or `numpy.array` object containing the gamma for each contract.
+    :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the gamma for each contract.
     >>> from py_vollib.black_scholes.greeks.numerical import gamma
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']

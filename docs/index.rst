@@ -24,7 +24,7 @@ On top of vectorization, this library includes a number of additional speedups (
 .. toctree::
     :glob:
     :maxdepth: 1
-    :caption: Package Reference:
+    :caption: Package Reference
 
     pkg_ref/models
     pkg_ref/iv
@@ -34,7 +34,7 @@ On top of vectorization, this library includes a number of additional speedups (
 .. toctree::
     :glob:
     :maxdepth: 1
-    :caption: API:
+    :caption: API
 
     api/api
 
@@ -42,13 +42,9 @@ On top of vectorization, this library includes a number of additional speedups (
 .. toctree::
     :glob:
     :maxdepth: 1
-    :caption: Patching py_vollib:
+    :caption: Benchmarking
 
-
-.. toctree::
-    :glob:
-    :maxdepth: 1
-    :caption: Benchmarking:
+    benchmarking
 
 
 

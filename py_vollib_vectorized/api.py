@@ -24,10 +24,10 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", r
     :param r: The Interest Free Rate.
     :param sigma: The Implied Volatility.
     :param q: The annualized continuous dividend yield.
-    :param model: Must be one of "black", "black_scholes" or "black_scholes_merton".
-    :param return_as: To return as a `pd.DataFrame` object, use "dataframe". To return as a `json` object, use "json". Any other value will return a python dictionary.
+    :param model: Must be one of 'black', 'black_scholes' or 'black_scholes_merton'.
+    :param return_as: To return as a :obj:`pd.DataFrame` object, use "dataframe". To return as a `json` object, use "json". Any other value will return a python dictionary.
     :param dtype: Data type.
-    :return: `pd.DataFrame`, `json` string, or `dict` object containing the greeks for each contract.
+    :return: :obj:`pd.DataFrame`, :obj:`json` string, or :obj:`dict` object containing the greeks for each contract.
     >>> flag = ['c', 'p']
     >>> S = 95
     >>> K = [100, 90]

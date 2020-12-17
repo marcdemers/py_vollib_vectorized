@@ -12,7 +12,7 @@ Automatic broadcasting is performed on the inputs.
 On top of vectorization, modifications to py_vollib include additional `numba` speedups; as such, `numba` is required.
 These speedups make `py_vollib_vectorized` the fastest library for pricing option contracts.
 
-See the [documentation](https://py_vollib_vectorized.readthedocs.io/en/latest) for more details.
+See the [documentation](https://py-vollib-vectorized.readthedocs.io/en/latest) for more details.
 
 ## Installation
 
@@ -103,7 +103,7 @@ result = price_dataframe(df, flag_col='Flag', underlying_price_col='S', strike_c
 
 ```
 
-See the [documentation](https//py_vollib_vectorized.readthedocs.io/en/latest) for more details.
+See the [documentation](https//py-vollib-vectorized.readthedocs.io/en/latest) for more details.
 
 ## Benchmarking
 

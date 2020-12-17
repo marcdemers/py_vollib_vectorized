@@ -1,0 +1,6 @@
+py_vollib
+numba>=0.47.0
+py_lets_be_rational
+numpy
+pandas
+scipy

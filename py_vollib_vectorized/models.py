@@ -18,7 +18,7 @@ def vectorized_black(flag, F, K, t, r, sigma, *, return_as="dataframe", dtype=np
     :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: The price of the option.
-    >>> from py_vollib.black import black
+    >>> import py_vollib.black
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
     >>> F = 95
@@ -26,7 +26,9 @@ def vectorized_black(flag, F, K, t, r, sigma, *, return_as="dataframe", dtype=np
     >>> t = .2
     >>> r = .2
     >>> sigma = .2
-    >>> black(flag, F, K, t, r, sigma, return_as='numpy')
+    >>> py_vollib.black.black(flag, F, K, t, r, sigma, return_as='numpy')
+    array([1.53408169, 1.38409245])
+    >>> py_vollib_vectorized.vectorized_black(flag, F, K, t, r, sigma, return_as='numpy')  # equivalent
     array([1.53408169, 1.38409245])
     """
     flag = _preprocess_flags(flag, dtype=dtype)
@@ -56,7 +58,7 @@ def vectorized_black_scholes(flag, S, K, t, r, sigma, *, return_as="dataframe", 
     :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: The price of the option.
-    >>> from py_vollib.black_scholes import black_scholes
+    >>> import py_vollib.black_scholes
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
     >>> S = 95
@@ -64,7 +66,9 @@ def vectorized_black_scholes(flag, S, K, t, r, sigma, *, return_as="dataframe", 
     >>> t = .2
     >>> r = .2
     >>> sigma = .2
-    >>> black_scholes(flag, S, K, t, r, sigma, return_as='numpy')
+    >>> py_vollib.black_scholes.black_scholes(flag, S, K, t, r, sigma, return_as='numpy')
+    array([2.89558836, 0.61109351])
+    >>> py_vollib_vectorized.vectorized_black_scholes(flag, S, K, t, r, sigma, return_as='numpy')  # equivalent
     array([2.89558836, 0.61109351])
     """
     flag = _preprocess_flags(flag, dtype=dtype)
@@ -95,7 +99,7 @@ def vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q, *, return_as="da
     :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: The price of the option.
-    >>> from py_vollib.black_scholes_merton import black_scholes_merton
+    >>> import py_vollib.black_scholes_merton
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
     >>> S = [95, 99]
@@ -104,7 +108,9 @@ def vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q, *, return_as="da
     >>> r = .2
     >>> sigma = .2
     >>> q = 0
-    >>> black_scholes_merton(flag, S, K, t, r, sigma, q, return_as='numpy')
+    >>> py_vollib.black_scholes_merton.black_scholes_merton(flag, S, K, t, r, sigma, q, return_as='numpy')
+    array([2.89558836, 0.23536284])
+    >>> py_vollib_vectorized.vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q, return_as='numpy')  # equivalent
     array([2.89558836, 0.23536284])
     """
     flag = _preprocess_flags(flag, dtype=dtype)

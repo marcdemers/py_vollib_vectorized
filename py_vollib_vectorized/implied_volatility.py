@@ -26,7 +26,7 @@ def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, *, on_error="
     :param dtype: Data type.
     :param kwargs: Other keyword arguments are ignored.
     :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the implied volatility for each contract.
-    >>> from py_vollib.black_scholes_merton.implied_volatility import implied_volatility
+    >>> import py_vollib.black_scholes_merton.implied_volatility
     >>> import py_vollib_vectorized
     >>> price = 0.10
     >>> S = 95
@@ -34,7 +34,9 @@ def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, *, on_error="
     >>> t = .2
     >>> r = .2
     >>> flag = ['c', 'p']
-    >>> implied_volatility(price, S, K, t, r, flag, q=0, return_as='numpy')
+    >>> py_vollib.black_scholes_merton.implied_volatility.implied_volatility(price, S, K, t, r, flag, q=0, return_as='numpy')
+    array([0.02621257, 0.12585767])
+    >>> py_vollib_vectorized.vectorized_implied_volatility(price, S, K, t, r, flag, q=0, model='black_scholes_merton',return_as='numpy')  # equivalent
     array([0.02621257, 0.12585767])
     """
     flag = _preprocess_flags(flag, dtype)
@@ -106,12 +108,11 @@ def vectorized_implied_volatility_black(price, F, K, r, t, flag, *, on_error="wa
     :param r: The Interest Free Rate.
     :param flag: For each contract, this should be specified as `c` for a call option and `p` for a put option.
     :param on_error: Either "raise", "warn" or "ignore".
-    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use
-    "dataframe". Any other value will return a :obj:`numpy.array` object.
+    :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :param kwargs: Other keyword arguments are ignored.
     :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the implied volatility for each contract.
-    >>> from py_vollib.black.implied_volatility import implied_volatility
+    >>> import py_vollib.black.implied_volatility
     >>> import py_vollib_vectorized
     >>> price = 0.10
     >>> F = 95
@@ -119,8 +120,10 @@ def vectorized_implied_volatility_black(price, F, K, r, t, flag, *, on_error="wa
     >>> t = .2
     >>> r = .2
     >>> flag = ['c', 'p']
-    >>> implied_volatility(price, F, K, r, t, flag, return_as='numpy')
-    array([0.07758129, 0.08177732])
+    >>> py_vollib.black.implied_volatility.implied_volatility(price, F, K, r, t, flag, return_as='numpy')
+    array([0.02621257, 0.12585767])
+    >>> py_vollib_vectorized.vectorized_implied_volatility_black(price, F, K, r, t, flag, return_as='numpy')  # equivalent
+    array([0.02621257, 0.12585767])
     """
     return vectorized_implied_volatility(price, F, K, t, r, flag, model="black", on_error=on_error, return_as=return_as,
                                          dtype=dtype)

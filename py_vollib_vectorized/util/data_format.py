@@ -2,10 +2,10 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from py_vollib.helpers import binary_flag
 from py_vollib.helpers.constants import FLOAT_MAX, MINUS_FLOAT_MAX
 from py_vollib.helpers.exceptions import PriceIsAboveMaximum, PriceIsBelowIntrinsic
 
+binary_flag = {'c': 1, 'p': -1, 1: 1, -1: -1, '1': 1, '-1': -1}
 
 def _preprocess_flags(flags, dtype):
     return np.array([binary_flag[f] for f in flags], dtype=dtype)
@@ -92,3 +92,9 @@ def _check_minus_above_float(values, on_error):
             elif on_error == "raise":
                 PriceIsBelowIntrinsic()
     return _below_float_min_array, _above_float_max_array
+
+def _validate_df_col(col, df):
+    if not isinstance(col, str):
+        raise ValueError(f"Column {col} must be a string!")
+    elif col not in df:
+        raise ValueError(f"Column {col} not found in dataframe!")

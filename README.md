@@ -6,9 +6,9 @@
 The `py_vollib_vectorized` package makes pricing thousands of option contracts and calculating greeks fast and effortless.
 It is built on top of the `py_vollib` library.
 Upon import, it will automatically patch the corresponding `py_vollib` functions so as to support vectorization.
-Inputs can then be passed as `numpy.array`, ` or `pandas.DataFrame`.
+Inputs can then be passed as floats, tuples, lists, `numpy.array`, or `pandas.Series`.
 
-On top of vectorization, modifications to py_vollib include additional `numba` speedups; as such, `numba` *is* required.
+On top of vectorization, modifications to py_vollib include additional `numba` speedups; as such, `numba` is required.
 
 See the [documentation](https://py_vollib_vectorized.readthedocs.io/en/latest) for more details.
 
@@ -31,7 +31,7 @@ See the [documentation](https://py_vollib_vectorized.readthedocs.io/en/latest) f
 import numpy as np
 import pandas as pd
 
-from py_vollib.black_scholes import black_scholes
+import py_vollib.black_scholes
 flag = 'c'  # 'c' for call, 'p' for put
 S = 100  # Underlying asset price
 K = 90  # Strike
@@ -39,7 +39,7 @@ t = 0.5  # (Annualized) time-to-expiration
 r = 0.01  # Interest free rate
 iv = 0.2  # Implied Volatility
 
-option_price = black_scholes(flag, S, K, t, r, iv)  # 12.111581435
+option_price = py_vollib.black_scholes.black_scholes(flag, S, K, t, r, iv)  # 12.111581435
 
 # This library keeps the same syntax, but you can pass as input any iterable of values.
 # This includes list, tuple, numpy.array, pd.Series, pd.DataFrame (with only a single column).
@@ -59,13 +59,30 @@ t = pd.Series([0.5, 0.6])  # (Annualized) times-to-expiration
 r = np.array([0.01])  # Interest free rates
 iv = 0.2  # Implied Volatilities
 
-option_price = black_scholes(flag, S, K, t, r, iv, return_as='array')  
+option_price = py_vollib.black_scholes.(flag, S, K, t, r, iv, return_as='array')  
 # array([12.111581435, 1.66270456231])
+```
 
+#### Utility functions
+We also define other utility functions to get all contract prices, implied volatilities, and greeks in a single call.
 
-# We also define other utility functions to get all contract greeks in one call.
+```python
+import pandas as pd
+from py_vollib_vectorized import price_dataframe, get_all_greeks
 
-from py_vollib_vectorized import get_all_greeks
+df = pd.DataFrame()
+df['Flag'] = ['c', 'p']
+df['S'] = 95
+df['K'] = [100, 90]
+df['T'] = 0.2
+df['R'] = 0.2
+df['IV'] = 0.2
+result = price_dataframe(df, flag_col='Flag', underlying_price_col='S', strike_col='K', annualized_tte_col='T',
+                     riskfree_rate_col='R', sigma_col='IV', model='black_scholes', inplace=False)
+#   Price       delta       gamma       theta       rho        vega
+#   2.895588    0.467506    0.046795    -0.045900   0.083035   0.168926
+#   0.611094    -0.136447   0.025739    -0.005335   -0.027151  0.092838
+
 
 greeks = get_all_greeks(flag, S, K, t, r, iv, model='black_scholes', return_as='dict')
 
@@ -74,10 +91,9 @@ greeks = get_all_greeks(flag, S, K, t, r, iv, model='black_scholes', return_as='
 #    'theta': array([-0.01263557, -0.00964498]),
 #    'rho': array([0.34073321, -0.13994668]),
 #    'vega': array([0.19626478, 0.22493816])}
-
 ```
 
-See the documentation and the tests directory for more details on calculating IV, option prices, or greeks.
+See the [documentation](https//py_vollib_vectorized.readthedocs.io/en/latest) for more details.
 
 ## Benchmarking
 

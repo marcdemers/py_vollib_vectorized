@@ -25,7 +25,7 @@ def delta(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="
     :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the delta for each contract.
-    >>> from py_vollib.black_scholes.greeks.numerical import delta
+    >>> import py_vollib.black_scholes.greeks.numerical
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
     >>> S = 95
@@ -33,7 +33,9 @@ def delta(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="
     >>> t = .2
     >>> r = .2
     >>> sigma = .2
-    >>> delta(flag, S, K, t, r, sigma, return_as='numpy')
+    >>> py_vollib.black_scholes.greeks.numerical.delta(flag, S, K, t, r, sigma, return_as='numpy')
+    array([ 0.46750566, -0.1364465 ])
+    >>> py_vollib_vectorized.vectorized_delta(flag, S, K, t, r, sigma, model='black_scholes', return_as='numpy')  # equivalent
     array([ 0.46750566, -0.1364465 ])
     """
     flag = _preprocess_flags(flag, dtype=dtype)
@@ -83,7 +85,7 @@ def theta(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
     :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the theta for each contract.
-    >>> from py_vollib.black_scholes.greeks.numerical import theta
+    >>> import py_vollib.black_scholes.greeks.numerical
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
     >>> S = 95
@@ -91,7 +93,9 @@ def theta(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
     >>> t = .2
     >>> r = .2
     >>> sigma = .2
-    >>> theta(flag, S, K, t, r, sigma, return_as='numpy')
+    >>> py_vollib.black_scholes.greeks.numerical.theta(flag, S, K, t, r, sigma, return_as='numpy')
+    array([-0.04589963, -0.00533543])
+    >>> py_vollib_vectorized.vectorized_theta(flag, S, K, t, r, sigma, model='black_scholes', return_as='numpy')  # equivalent
     array([-0.04589963, -0.00533543])
     """
     flag = _preprocess_flags(flag, dtype=dtype)
@@ -140,7 +144,7 @@ def vega(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="d
     :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the vega for each contract.
-    >>> from py_vollib.black_scholes.greeks.numerical import vega
+    >>> import py_vollib.black_scholes.greeks.numerical
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
     >>> S = 95
@@ -148,7 +152,9 @@ def vega(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="d
     >>> t = .2
     >>> r = .2
     >>> sigma = .2
-    >>> vega(flag, S, K, t, r, sigma, return_as='numpy')
+    >>> py_vollib.black_scholes.greeks.numerical.vega(flag, S, K, t, r, sigma, return_as='numpy')
+    array([0.16892575, 0.0928379 ])
+    >>> py_vollib_vectorized.vectorized_vega(flag, S, K, t, r, sigma, model='black_scholes', return_as='numpy')  # equivalent
     array([0.16892575, 0.0928379 ])
     """
     flag = _preprocess_flags(flag, dtype=dtype)
@@ -197,7 +203,7 @@ def rho(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="da
     :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the rho for each contract.
-    >>> from py_vollib.black_scholes.greeks.numerical import rho
+    >>> import py_vollib.black_scholes.greeks.numerical
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
     >>> S = 95
@@ -205,7 +211,9 @@ def rho(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="da
     >>> t = .2
     >>> r = .2
     >>> sigma = .2
-    >>> rho(flag, S, K, t, r, sigma, return_as='numpy')
+    >>> py_vollib.black_scholes.greeks.numerical.rho(flag, S, K, t, r, sigma, return_as='numpy')
+    array([ 0.0830349 , -0.02715114])
+    >>> py_vollib_vectorized.vectorized_rho(flag, S, K, t, r, sigma, model='black_scholes', return_as='numpy')  # equivalent
     array([ 0.0830349 , -0.02715114])
     """
 
@@ -255,7 +263,7 @@ def gamma(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
     :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
     :return: :obj:`pd.Series`, :obj:`pd.DataFrame` or :obj:`numpy.array` object containing the gamma for each contract.
-    >>> from py_vollib.black_scholes.greeks.numerical import gamma
+    >>> import py_vollib.black_scholes.greeks.numerical
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
     >>> S = 95
@@ -263,7 +271,9 @@ def gamma(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
     >>> t = .2
     >>> r = .2
     >>> sigma = .2
-    >>> gamma(flag, S, K, t, r, sigma, return_as='numpy')
+    >>> py_vollib.black_scholes.greeks.numerical.gamma(flag, S, K, t, r, sigma, return_as='numpy')
+    array([0.0467948, 0.0257394])
+    >>> py_vollib_vectorized.vectorized_gamma(flag, S, K, t, r, sigma, model='black_scholes', return_as='numpy')  # equivalent
     array([0.0467948, 0.0257394])
     """
     flag = _preprocess_flags(flag, dtype=dtype)

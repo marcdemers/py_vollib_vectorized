@@ -7,7 +7,7 @@ from py_vollib_vectorized.implied_volatility import vectorized_implied_volatilit
 
 from py_vollib_vectorized.models import vectorized_black_scholes, vectorized_black_scholes_merton
 
-from py_vollib_vectorized.api import get_all_greeks
+from py_vollib_vectorized.api import get_all_greeks, price_dataframe
 
 class Test(TestCase):
     def setUp(self) -> None:
@@ -122,7 +122,7 @@ class Test(TestCase):
         self.assertIsNone(assert_array_almost_equal(self.test_df_puts["bs_put"].values.ravel(), prices.values.ravel()))
 
 
-    def test_get_all_greeks(self):
+    def test_api_get_all_greeks(self):
         # Calls
         greeks_dataframe = get_all_greeks(
             sigma=self.test_df_calls["v"].values,  # current option price
@@ -150,6 +150,31 @@ class Test(TestCase):
         self.assertIsNone(assert_array_almost_equal(greeks_dataframe["delta"], self.test_df_puts["PD"]))
         self.assertIsNone(assert_array_almost_equal(greeks_dataframe["gamma"], self.test_df_puts["PG"]))
         self.assertIsNone(assert_array_almost_equal(greeks_dataframe["vega"], self.test_df_puts["PV"] * .01, decimal=3))
+
+    def test_api_price_dataframe(self):
+        for model in ["black", "black_scholes", "black_scholes_merton"]:
+            for what_to_test in ["sigma", "price", "sigma_price"]:
+                resulting_df = price_dataframe(self.test_df_puts,
+                                               flag_col='flag',
+                                               underlying_price_col='S',
+                                               strike_col='K',
+                                               annualized_tte_col='t',
+                                               riskfree_rate_col='R',
+                                               sigma_col='v' if "sigma" in what_to_test else None,
+                                               model=model,
+                                               inplace=False,
+                                               dividend_col='q',
+                                               price_col='bs_put' if "price" in what_to_test else None
+                                               )
+                if "sigma" not in what_to_test:
+                    self.assertTrue("IV" in resulting_df.columns)
+                if "price" not in what_to_test:
+                    self.assertTrue("Price" in resulting_df.columns)
+                self.assertTrue("delta" in resulting_df.columns)
+                self.assertTrue("gamma" in resulting_df.columns)
+                self.assertTrue("theta" in resulting_df.columns)
+                self.assertTrue("vega" in resulting_df.columns)
+                self.assertTrue("rho" in resulting_df.columns)
 
     def test_validity_greeks(self):
         from py_vollib_vectorized.greeks import delta as my_delta, theta as my_theta, gamma as my_gamma, \

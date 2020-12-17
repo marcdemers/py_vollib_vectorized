@@ -7,6 +7,7 @@ The `py_vollib_vectorized` package makes pricing thousands of option contracts a
 It is built on top of the `py_vollib` library.
 Upon import, it will automatically patch the corresponding `py_vollib` functions so as to support vectorization.
 Inputs can then be passed as floats, tuples, lists, `numpy.array`, or `pandas.Series`.
+Automatic broadcasting is performed on the inputs.
 
 On top of vectorization, modifications to py_vollib include additional `numba` speedups; as such, `numba` is required.
 

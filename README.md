@@ -10,6 +10,7 @@ Inputs can then be passed as floats, tuples, lists, `numpy.array`, or `pandas.Se
 Automatic broadcasting is performed on the inputs.
 
 On top of vectorization, modifications to py_vollib include additional `numba` speedups; as such, `numba` is required.
+These speedups make `py_vollib_vectorized` the fastest library for pricing option contracts.
 
 See the [documentation](https://py_vollib_vectorized.readthedocs.io/en/latest) for more details.
 
@@ -23,6 +24,11 @@ See the [documentation](https://py_vollib_vectorized.readthedocs.io/en/latest) f
 * Requires py_vollib, numba, numpy, pandas, scipy
 
 ## Code samples
+
+The library can be used in two ways.
+Upon import, it monkey-patches (i.e. replaces) the corresponding functions in `py_vollib`.
+
+As a more versatile alternative, users that would prefer to work with a dedicated option pricing API can make use of the utility functions provided by the library.
 
 #### Patching `py_vollib`
 
@@ -60,8 +66,8 @@ t = pd.Series([0.5, 0.6])  # (Annualized) times-to-expiration
 r = np.array([0.01])  # Interest free rates
 iv = 0.2  # Implied Volatilities
 
-option_price = py_vollib.black_scholes.(flag, S, K, t, r, iv, return_as='array')  
-# array([12.111581435, 1.66270456231])
+option_price = py_vollib.black_scholes.black_scholes(flag, S, K, t, r, iv, return_as='array')  
+# array([12.11158143,  2.02418536])
 ```
 
 #### Utility functions
@@ -70,6 +76,17 @@ We also define other utility functions to get all contract prices, implied volat
 ```python
 import pandas as pd
 from py_vollib_vectorized import price_dataframe, get_all_greeks
+
+# Using the data above, we can calculate all contracts greeks in a single call
+greeks = get_all_greeks(flag, S, K, t, r, iv, model='black_scholes', return_as='dict')
+
+#   {'delta': array([ 0.80263679, -0.21293214]),
+#    'gamma': array([0.0196385, 0.01875498]),
+#    'theta': array([-0.01263557, -0.00964498]),
+#    'rho': array([0.34073321, -0.13994668]),
+#    'vega': array([0.19626478, 0.22493816])}
+
+# We can also price a dataframe easily by specifying a dataframe and the corresponding columns
 
 df = pd.DataFrame()
 df['Flag'] = ['c', 'p']
@@ -84,14 +101,6 @@ result = price_dataframe(df, flag_col='Flag', underlying_price_col='S', strike_c
 #   2.895588    0.467506    0.046795    -0.045900   0.083035   0.168926
 #   0.611094    -0.136447   0.025739    -0.005335   -0.027151  0.092838
 
-
-greeks = get_all_greeks(flag, S, K, t, r, iv, model='black_scholes', return_as='dict')
-
-#   {'delta': array([ 0.80263679, -0.21293214]),
-#    'gamma': array([0.0196385, 0.01875498]),
-#    'theta': array([-0.01263557, -0.00964498]),
-#    'rho': array([0.34073321, -0.13994668]),
-#    'vega': array([0.19626478, 0.22493816])}
 ```
 
 See the [documentation](https//py_vollib_vectorized.readthedocs.io/en/latest) for more details.

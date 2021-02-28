@@ -62,6 +62,8 @@ def delta(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
+    delta = np.ascontiguousarray(delta)
+
     if return_as == "series":
         return pd.Series(delta, name="delta")
     elif return_as == "dataframe":
@@ -121,6 +123,8 @@ def theta(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
+    theta = np.ascontiguousarray(theta)
+
     if return_as == "series":
         return pd.Series(theta, name="theta")
     elif return_as == "dataframe":
@@ -179,6 +183,8 @@ def vega(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="d
 
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
+
+    vega = np.ascontiguousarray(vega)
 
     if return_as == "series":
         return pd.Series(vega, name="vega")
@@ -240,6 +246,8 @@ def rho(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="da
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
+    rho = np.ascontiguousarray(rho)
+
     if return_as == "series":
         return pd.Series(rho, name="rho")
     elif return_as == "dataframe":
@@ -298,6 +306,8 @@ def gamma(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
 
     else:
         raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
+
+    gamma = np.ascontiguousarray(gamma)
 
     if return_as == "series":
         return pd.Series(gamma, name="gamma")

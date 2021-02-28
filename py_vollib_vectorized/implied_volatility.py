@@ -47,7 +47,6 @@ def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, *, on_error="
 
     deflater = np.exp(-r * t)
 
-    #TODO expand this to models and greeks?
     if np.any(deflater == 0) and on_error != "ignore":
         if on_error == "warn":
             warnings.warn(
@@ -76,6 +75,7 @@ def vectorized_implied_volatility(price, S, K, t, r, flag, q=None, *, on_error="
     below_intrinsic, above_max_price = _check_below_and_above_intrinsic(K, F, flag, undiscounted_option_price, on_error)
 
     sigma_calc = implied_volatility_from_a_transformed_rational_guess(undiscounted_option_price, F, K, t, flag)
+    sigma_calc = np.ascontiguousarray(sigma_calc)
 
     below_min_float, above_max_float = _check_minus_above_float(sigma_calc, on_error)
 

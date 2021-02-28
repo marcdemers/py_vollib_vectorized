@@ -7,7 +7,6 @@ dS = .01
 
 #### BLACK
 
-#TODO the black greek functions are broken, missing the b=0
 @maybe_jit()
 def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas):
     deltas = []
@@ -32,7 +31,7 @@ def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas):
             delta = (black(F+dS, K, sigma, t, flag) - black(F - dS, K, sigma, t, flag)) / (
                     2 * dS)
         deltas.append(delta)
-    return np.array(deltas)
+    return deltas
 
 
 @maybe_jit()
@@ -44,7 +43,7 @@ def numerical_theta_black(flags, Fs, Ks, ts, rs, sigmas):
         else:
             theta = black(F, K, sigma, t - 1./365., flag) - black(F, K, sigma, t, flag)
         thetas.append(theta)
-    return np.array(thetas)
+    return thetas
 
 
 @maybe_jit()
@@ -54,7 +53,7 @@ def numerical_vega_black(flags, Fs, Ks, ts, rs, sigmas):
     for flag, F, K, t, r, sigma in zip(flags, Fs, Ks, ts, rs, sigmas):
         vega = (black(F, K, sigma + 0.01, t, flag) - black(F, K, sigma - 0.01, t, flag)) / 2.
         vegas.append(vega)
-    return np.array(vegas)
+    return vegas
 
 
 @maybe_jit()
@@ -66,7 +65,7 @@ def numerical_rho_black(flags, Fs, Ks, ts, rs, sigmas):
         rho = (black(flag, F, K, t, r + 0.01, sigma) - black(flag, F, K, t, r - 0.01, sigma)) / 2.
         rhos.append(rho)
 
-    return np.array(rhos)
+    return rhos
 
 
 @maybe_jit()
@@ -81,7 +80,7 @@ def numerical_gamma_black(flags, Fs, Ks, ts, rs, sigmas):
                      black(flag, F - dS, K, t, r, sigma)) / dS ** 2.
 
         gammas.append(gamma)
-    return np.array(gammas)
+    return gammas
 
 #### BLACK SCHOLES
 
@@ -109,7 +108,7 @@ def numerical_delta_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):
             delta = (black_scholes(flag, S + dS, K, t, r, sigma) - black_scholes(flag, S - dS, K, t, r, sigma)) / (
                     2 * dS)
         deltas.append(delta)
-    return np.array(deltas)
+    return deltas
 
 
 @maybe_jit()
@@ -121,7 +120,7 @@ def numerical_theta_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):
         else:
             theta = black_scholes(flag, S, K, t - 1. / 365., r, sigma) - black_scholes(flag, S, K, t, r, sigma)
         thetas.append(theta)
-    return np.array(thetas)
+    return thetas
 
 
 @maybe_jit()
@@ -131,7 +130,7 @@ def numerical_vega_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):
     for flag, S, K, t, r, sigma, b in zip(flags, Ss, Ks, ts, rs, sigmas, bs):
         vega = (black_scholes(flag, S, K, t, r, sigma + 0.01) - black_scholes(flag, S, K, t, r, sigma - 0.01)) / 2.
         vegas.append(vega)
-    return np.array(vegas)
+    return vegas
 
 
 @maybe_jit()
@@ -142,7 +141,7 @@ def numerical_rho_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):
         rho = (black_scholes(flag, S, K, t, r + 0.01, sigma) - black_scholes(flag, S, K, t, r - 0.01, sigma)) / 2.
         rhos.append(rho)
 
-    return np.array(rhos)
+    return rhos
 
 
 @maybe_jit()
@@ -157,7 +156,7 @@ def numerical_gamma_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):
                      black_scholes(flag, S - dS, K, t, r, sigma)) / dS ** 2.
 
         gammas.append(gamma)
-    return np.array(gammas)
+    return gammas
 
 
 ### BLACK SCHOLES MERTON
@@ -190,7 +189,7 @@ def numerical_delta_black_scholes_merton(flags, Ss, Ks, ts, rs, sigmas, bs):
                                                                                                       r - b)) / (
                             2 * dS)
         deltas.append(delta)
-    return np.array(deltas)
+    return deltas
 
 
 @maybe_jit()
@@ -207,7 +206,7 @@ def numerical_theta_black_scholes_merton(flags, Ss, Ks, ts, rs, sigmas, bs):
                                                                                                             r, sigma,
                                                                                                             r - b)
         thetas.append(theta)
-    return np.array(thetas)
+    return thetas
 
 
 @maybe_jit()
@@ -219,7 +218,7 @@ def numerical_vega_black_scholes_merton(flags, Ss, Ks, ts, rs, sigmas, bs):
                                                                                                    sigma - 0.01,
                                                                                                    r - b)) / 2.
         vegas.append(vega)
-    return np.array(vegas)
+    return vegas
 
 
 @maybe_jit()
@@ -233,7 +232,7 @@ def numerical_rho_black_scholes_merton(flags, Ss, Ks, ts, rs, sigmas, bs):
                                                                                                          r - b - 0.01)) / 2.
         rhos.append(rho)
 
-    return np.array(rhos)
+    return rhos
 
 
 @maybe_jit()
@@ -251,4 +250,4 @@ def numerical_gamma_black_scholes_merton(flags, Ss, Ks, ts, rs, sigmas, bs):
                      black_scholes_merton(flag, S - dS, K, t, r, sigma, r - b)) / dS ** 2.
 
         gammas.append(gamma)
-    return np.array(gammas)
+    return gammas

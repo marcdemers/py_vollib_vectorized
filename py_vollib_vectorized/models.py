@@ -36,12 +36,13 @@ def vectorized_black(flag, F, K, t, r, sigma, *, return_as="dataframe", dtype=np
     _validate_data(F, K, sigma, t, flag)
 
     prices = _black_vectorized_call(F, K, sigma, t, flag)
+    prices = np.ascontiguousarray(prices)
 
     if return_as == "series":
         return pd.Series(prices, name="Price")
     elif return_as == "dataframe":
         return pd.DataFrame(prices, columns=["Price"])
-    return np.array(prices)
+    return prices
 
 
 def vectorized_black_scholes(flag, S, K, t, r, sigma, *, return_as="dataframe", dtype=np.float64):
@@ -76,12 +77,13 @@ def vectorized_black_scholes(flag, S, K, t, r, sigma, *, return_as="dataframe", 
     _validate_data(S, K, sigma, t, r, flag)
 
     prices = _black_scholes_vectorized_call(flag, S, K, t, r, sigma)
+    prices = np.ascontiguousarray(prices)
 
     if return_as == "series":
         return pd.Series(prices, name="Price")
     elif return_as == "dataframe":
         return pd.DataFrame(prices, columns=["Price"])
-    return np.array(prices)
+    return prices
 
 
 def vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q, *, return_as="dataframe", dtype=np.float64):
@@ -118,9 +120,10 @@ def vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q, *, return_as="da
     _validate_data(flag, S, K, t, r, sigma, q)
 
     prices = _black_scholes_merton_vectorized_call(flag, S, K, t, r, sigma, q)
+    prices = np.ascontiguousarray(prices)
 
     if return_as == "series":
         return pd.Series(prices, name="Price")
     elif return_as == "dataframe":
         return pd.DataFrame(prices, columns=["Price"])
-    return np.array(prices)
+    return prices

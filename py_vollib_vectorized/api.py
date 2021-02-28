@@ -203,7 +203,7 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", r
     >>> t = .2
     >>> r = .2
     >>> sigma = .2
-    >>> get_all_greeks(flag, S, K, t, r, sigma, model='black_scholes', return_as='numpy')
+    >>> get_all_greeks(flag, S, K, t, r, sigma, model='black_scholes', return_as='dict')
     {'delta': array([ 0.46750566, -0.1364465 ]),
      'gamma': array([0.0467948, 0.0257394]),
      'theta': array([-0.04589963, -0.00533543]),

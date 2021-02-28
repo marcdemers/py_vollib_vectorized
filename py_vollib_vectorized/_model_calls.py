@@ -83,7 +83,7 @@ def _black_scholes_vectorized_call(flags, Ss, Ks, ts, rs, sigmas):
     prices = []
     for q, S, K, t, r, sigma in zip(flags, Ss, Ks, ts, rs, sigmas):
         prices.append(black_scholes(q, S, K, t, r, sigma))
-    return np.array(prices)
+    return prices
 
 
 @maybe_jit()
@@ -91,7 +91,7 @@ def _black_vectorized_call(Fs, Ks, sigmas, ts, flag):
     prices = []
     for F, K, sigma, T, q in zip(Fs, Ks, sigmas, ts, flag):
         prices.append(black(F, K, sigma, T, q))
-    return np.array(prices)
+    return prices
 
 
 @maybe_jit()
@@ -99,4 +99,4 @@ def _black_scholes_merton_vectorized_call(flags, Ss, Ks, ts, rs, sigmas, qs):
     prices = []
     for f, S, K, t, r, sigma, q in zip(flags, Ss, Ks, ts, rs, sigmas, qs):
         prices.append(black_scholes_merton(f, S, K, t, r, sigma, q))
-    return np.array(prices)
+    return prices

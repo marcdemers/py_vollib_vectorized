@@ -50,7 +50,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 html_theme = 'sphinx_rtd_theme'
 
-#TODO why do these goddam imports not work
 html_theme_options = {
     'collapse_navigation': True,
     'display_version': True,

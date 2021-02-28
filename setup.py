@@ -10,7 +10,7 @@ with io.open(os.path.join(dir, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='py_vollib_vectorized',
-      version='0.1',
+      version='0.1.1',
       description='A fast, vectorized approach to calculating Implied Volatility and Greeks using the Black, Black-Scholes and Black-Scholes-Merton pricing.',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -37,6 +37,6 @@ setup(name='py_vollib_vectorized',
           'Topic :: Office/Business :: Financial',
           'Topic :: Office/Business :: Financial :: Investment',
       ],
-      install_requires=['py_vollib', 'numba>=0.47.0', 'py_lets_be_rational', 'numpy', 'pandas', 'scipy'],
+      install_requires=['py_vollib>=1.0.1', 'numba>=0.51.0', 'py_lets_be_rational', 'numpy', 'pandas', 'scipy'],
       packages=find_packages()
       )

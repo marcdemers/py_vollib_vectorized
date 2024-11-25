@@ -87,10 +87,10 @@ def _black_scholes_vectorized_call(flags, Ss, Ks, ts, rs, sigmas):
 
 
 @maybe_jit()
-def _black_vectorized_call(Fs, Ks, sigmas, ts, flag):
+def _black_vectorized_call(Fs, Ks, sigmas, ts, rs, flag):
     prices = []
-    for F, K, sigma, T, q in zip(Fs, Ks, sigmas, ts, flag):
-        prices.append(black(F, K, sigma, T, q))
+    for F, K, sigma, T, r, q in zip(Fs, Ks, sigmas, ts, rs, flag):
+        prices.append(np.exp(-r*T)*black(F, K, sigma, T, q))
     return prices
 
 

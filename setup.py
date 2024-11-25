@@ -10,7 +10,7 @@ with io.open(os.path.join(dir, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='py_vollib_vectorized',
-      version='0.1.1',
+      version='0.1.2',
       description='A fast, vectorized approach to calculating Implied Volatility and Greeks using the Black, Black-Scholes and Black-Scholes-Merton pricing.',
       long_description=long_description,
       long_description_content_type='text/markdown',

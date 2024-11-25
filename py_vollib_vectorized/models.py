@@ -14,10 +14,11 @@ def vectorized_black(flag, F, K, t, r, sigma, *, return_as="dataframe", dtype=np
     :param K: The strike price.
     :param sigma: The Implied Volatility (as a decimal, i.e. 0.10 for 10%).
     :param t: The annualized time to expiration. Must be positive. For small TTEs, use a small value (1e-3).
+    :param r: The risk-free rate
     :param flag: For each contract, this should be specified as `c` for a call option and `p` for a put option.
     :param return_as: To return as a :obj:`pd.Series` object, use "series". To return as a :obj:`pd.DataFrame` object, use "dataframe". Any other value will return a :obj:`numpy.array` object.
     :param dtype: Data type.
-    :return: The price of the option.
+    :return: The price of the option (after discounting)
     >>> import py_vollib.black
     >>> import py_vollib_vectorized
     >>> flag = ['c', 'p']
@@ -32,10 +33,10 @@ def vectorized_black(flag, F, K, t, r, sigma, *, return_as="dataframe", dtype=np
     array([1.53408169, 1.38409245])
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    F, K, sigma, t, flag = maybe_format_data_and_broadcast(F, K, sigma, t, flag, dtype=dtype)
-    _validate_data(F, K, sigma, t, flag)
+    F, K, sigma, t, r, flag = maybe_format_data_and_broadcast(F, K, sigma, t, r, flag, dtype=dtype)
+    _validate_data(F, K, sigma, t, r, flag)
 
-    prices = _black_vectorized_call(F, K, sigma, t, flag)
+    prices = _black_vectorized_call(F, K, sigma, t, r, flag)
     prices = np.ascontiguousarray(prices)
 
     if return_as == "series":

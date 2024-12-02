@@ -135,9 +135,9 @@ def price_dataframe(df, *, flag_col=None, underlying_price_col=None, strike_col=
             raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
         if inplace:
-            df["Price"] = price
+            df["Price"] = price.to_numpy() if not isinstance(price, np.ndarray) else price
         else:
-            output_df["Price"] = price
+            output_df["Price"] = price.to_numpy() if not isinstance(price, np.ndarray) else price
 
     if _iv_calc:
         if model == "black":
@@ -164,16 +164,16 @@ def price_dataframe(df, *, flag_col=None, underlying_price_col=None, strike_col=
             raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
         if inplace:
-            df["IV"] = sigma
+            df["IV"] = sigma.to_numpy() if not isinstance(sigma, np.ndarray) else sigma
         else:
-            output_df["IV"] = sigma
+            output_df["IV"] = sigma.to_numpy() if not isinstance(sigma, np.ndarray) else sigma
 
     if _greek_calc:
         greeks = get_all_greeks(flag, S, K, t, r, sigma, q, model=model, return_as="dataframe")
 
         for col in greeks:
             if inplace:
-                df[col] = greeks[col]
+                df[col] = greeks[col].to_numpy()
             else:
                 output_df[col] = greeks[col]
 

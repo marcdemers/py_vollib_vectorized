@@ -44,7 +44,7 @@ def delta(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="
 
     if model == "black":
         b = 0
-        delta = numerical_delta_black(flag, S, K, t, r, sigma, b)
+        delta = numerical_delta_black(flag, S, K, t, r, sigma)
     elif model == "black_scholes":
         b = r
         delta = numerical_delta_black_scholes(flag, S, K, t, r, sigma, b)
@@ -106,7 +106,7 @@ def theta(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
 
     if model == "black":
         b = 0
-        theta = numerical_theta_black(flag, S, K, t, r, sigma, b)
+        theta = numerical_theta_black(flag, S, K, t, r, sigma)
 
     elif model == "black_scholes":
         b = r
@@ -167,7 +167,7 @@ def vega(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="d
 
     if model == "black":
         b = 0
-        vega = numerical_vega_black(flag, S, K, t, r, sigma, b)
+        vega = numerical_vega_black(flag, S, K, t, r, sigma)
 
     elif model == "black_scholes":
         b = r
@@ -229,7 +229,7 @@ def rho(flag, S, K, t, r, sigma, q=None, *, model="black_scholes", return_as="da
 
     if model == "black":
         b = 0
-        rho = numerical_rho_black(flag, S, K, t, r, sigma, b)
+        rho = numerical_rho_black(flag, S, K, t, r, sigma)
 
     elif model == "black_scholes":
         b = r
@@ -291,7 +291,7 @@ def gamma(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
     if model == "black":
         b = 0
         # black scholes, it calls the black_scholes function and not the black function.
-        gamma = numerical_gamma_black(flag, S, K, t, r, sigma, b)
+        gamma = numerical_gamma_black(flag, S, K, t, r, sigma)
     elif model == "black_scholes":
         b = r
         gamma = numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b)

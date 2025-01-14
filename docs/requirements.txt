@@ -1,6 +1,6 @@
-py_vollib
+py_vollib>=1.0.1
 numba>=0.47.0
-py_lets_be_rational
+py_lets_be_rational>=1.0.0
 numpy
 pandas
 scipy

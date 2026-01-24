@@ -35,7 +35,14 @@ setup(name='py_vollib_vectorized',
           'Topic :: Office/Business :: Financial',
           'Topic :: Office/Business :: Financial :: Investment',
       ],
-      install_requires=['py_vollib>=1.0.1', 'numba>=0.61.0', 'py_lets_be_rational', 'numpy', 'pandas', 'scipy'],
+      install_requires=[
+          'py_vollib>=1.0.1',
+          'numba>=0.61.0',
+          'py_lets_be_rational',
+          'numpy',
+          'pandas',
+          'scipy'
+      ],
       extras_require={
           'test': ['pytest'],
       },

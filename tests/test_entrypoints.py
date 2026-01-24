@@ -1,7 +1,10 @@
 from unittest import TestCase
 import json
+from pathlib import Path
 import pandas as pd, numpy as np
 from numpy.testing import assert_array_almost_equal
+
+TEST_DIR = Path(__file__).parent
 
 from py_vollib_vectorized.implied_volatility import vectorized_implied_volatility
 
@@ -11,7 +14,7 @@ from py_vollib_vectorized.api import get_all_greeks, price_dataframe
 
 class Test(TestCase):
     def setUp(self) -> None:
-        with open("test_data_py_vollib.json", "rb") as f:
+        with open(TEST_DIR / "test_data_py_vollib.json", "rb") as f:
             d = json.load(f)
             self.test_df = pd.DataFrame(d["data"], index=d["index"], columns=d["columns"])
             self.test_df_calls = self.test_df.copy()
@@ -184,7 +187,7 @@ class Test(TestCase):
         from py_vollib.black_scholes.greeks.numerical import delta as original_delta, gamma as original_gamma, \
             rho as original_rho, theta as original_theta, vega as original_vega
 
-        data = pd.read_csv("fake_data.csv")
+        data = pd.read_csv(TEST_DIR / "fake_data.csv")
         ivs = vectorized_implied_volatility(
             price=data["MidPx"].values,  # current option price
             S=data["Px"].values,  # underlying asset price

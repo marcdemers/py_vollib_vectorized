@@ -3,7 +3,7 @@ import numpy as np
 from py_vollib_vectorized.util.jit_helper import maybe_jit
 from ._model_calls import black, black_scholes, black_scholes_merton
 
-dS = .01
+dS = 1e-6
 
 #### BLACK
 
@@ -28,8 +28,8 @@ def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas):
                 if flag < 0:  # put option
                     delta = -1.0
         else:
-            delta = (black(F+dS, K, sigma, t, flag) - black(F - dS, K, sigma, t, flag)) / (
-                    2 * dS)
+            delta = (black(F*(1+dS), K, sigma, t, flag) - black(F*(1-dS), K, sigma, t, flag)) / (
+                    2*F*dS)
         deltas.append(delta)
     return deltas
 
@@ -76,8 +76,8 @@ def numerical_gamma_black(flags, Fs, Ks, ts, rs, sigmas):
         if t == 0:
             gamma = np.inf if F == K else 0.0
         else:
-            gamma = (black(flag, F + dS, K, t, r, sigma) - 2. * black(flag, F, K, t, r, sigma) + \
-                     black(flag, F - dS, K, t, r, sigma)) / dS ** 2.
+            gamma = (black(flag, F*(1+dS), K, t, r, sigma) - 2. * black(flag, F, K, t, r, sigma) + \
+                     black(flag, F*(1-dS), K, t, r, sigma)) / (F*dS) ** 2.
 
         gammas.append(gamma)
     return gammas
@@ -105,8 +105,8 @@ def numerical_delta_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):
                 if flag < 0:  # put option
                     delta = -1.0
         else:
-            delta = (black_scholes(flag, S + dS, K, t, r, sigma) - black_scholes(flag, S - dS, K, t, r, sigma)) / (
-                    2 * dS)
+            delta = (black_scholes(flag, S*(1+dS), K, t, r, sigma) - black_scholes(flag, S*(1-dS), K, t, r, sigma)) / (
+                    2 * S*dS)
         deltas.append(delta)
     return deltas
 
@@ -152,8 +152,8 @@ def numerical_gamma_black_scholes(flags, Ss, Ks, ts, rs, sigmas, bs):
         if t == 0:
             gamma = np.inf if S == K else 0.0
         else:
-            gamma = (black_scholes(flag, S + dS, K, t, r, sigma) - 2. * black_scholes(flag, S, K, t, r, sigma) + \
-                     black_scholes(flag, S - dS, K, t, r, sigma)) / dS ** 2.
+            gamma = (black_scholes(flag, S*(1+dS), K, t, r, sigma) - 2. * black_scholes(flag, S, K, t, r, sigma) + \
+                     black_scholes(flag, S*(1-dS), K, t, r, sigma)) / (S*dS) ** 2.
 
         gammas.append(gamma)
     return gammas
@@ -183,11 +183,11 @@ def numerical_delta_black_scholes_merton(flags, Ss, Ks, ts, rs, sigmas, bs):
                 if flag < 0:  # put option
                     delta = -1.0
         else:
-            delta = (black_scholes_merton(flag, S + dS, K, t, r, sigma, r - b) - black_scholes_merton(flag, S - dS, K,
+            delta = (black_scholes_merton(flag, S*(1+dS), K, t, r, sigma, r - b) - black_scholes_merton(flag, S*(1-dS), K,
                                                                                                       t, r,
                                                                                                       sigma,
                                                                                                       r - b)) / (
-                            2 * dS)
+                            2 * dS*S)
         deltas.append(delta)
     return deltas
 
@@ -243,11 +243,11 @@ def numerical_gamma_black_scholes_merton(flags, Ss, Ks, ts, rs, sigmas, bs):
         if t == 0:
             gamma = np.inf if S == K else 0.0
         else:
-            gamma = (black_scholes_merton(flag, S + dS, K, t, r, sigma, r - b) - 2. * black_scholes_merton(flag, S, K,
+            gamma = (black_scholes_merton(flag, S*(1+dS), K, t, r, sigma, r - b) - 2. * black_scholes_merton(flag, S, K,
                                                                                                            t, r,
                                                                                                            sigma,
                                                                                                            r - b) + \
-                     black_scholes_merton(flag, S - dS, K, t, r, sigma, r - b)) / dS ** 2.
+                     black_scholes_merton(flag, S*(1-dS), K, t, r, sigma, r - b)) / (S*dS) ** 2.
 
         gammas.append(gamma)
     return gammas

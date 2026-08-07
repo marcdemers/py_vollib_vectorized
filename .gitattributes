@@ -1,0 +1,47 @@
+# 1. 核心规则：所有文本文件自动检测，并强制统一使用 LF 换行符
+* text=auto eol=lf
+
+# 2. 针对特定源代码文件的明确指定（增强兼容性）
+*.js text eol=lf
+*.ts text eol=lf
+*.jsx text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.java text eol=lf
+*.c text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+
+# 3. Windows 批处理文件特殊处理：必须使用 CRLF，否则在 Windows 下无法执行
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 4. 二进制文件：禁止 Git 进行任何换行符转换或差异比较
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+*.7z binary
+*.rar binary
+*.exe binary
+*.dll binary
+*.so binary
+*.mp3 binary

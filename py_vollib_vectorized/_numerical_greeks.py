@@ -6,9 +6,11 @@ from ._model_calls import black, black_scholes, black_scholes_merton, discounted
 dS = .01
 
 #### BLACK
+# 注意: Black-76 模型 b=0 (cost of carry 持有成本), 已内嵌于 discounted_black() 的折现逻辑中。
+# bs 参数为签名一致性占位, 不参与计算, 使 greeks.py 可统一传递 b 参数。
 
 @maybe_jit()
-def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas):
+def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas, bs):
     n = len(flags)
     deltas = np.empty(n)
     for i, (flag, F, K, t, r, sigma) in enumerate(zip(flags, Fs, Ks, ts, rs, sigmas)):
@@ -36,7 +38,7 @@ def numerical_delta_black(flags, Fs, Ks, ts, rs, sigmas):
 
 
 @maybe_jit()
-def numerical_theta_black(flags, Fs, Ks, ts, rs, sigmas):
+def numerical_theta_black(flags, Fs, Ks, ts, rs, sigmas, bs):
     n = len(flags)
     thetas = np.empty(n)
     for i, (flag, F, K, t, r, sigma) in enumerate(zip(flags, Fs, Ks, ts, rs, sigmas)):
@@ -49,7 +51,7 @@ def numerical_theta_black(flags, Fs, Ks, ts, rs, sigmas):
 
 
 @maybe_jit()
-def numerical_vega_black(flags, Fs, Ks, ts, rs, sigmas):
+def numerical_vega_black(flags, Fs, Ks, ts, rs, sigmas, bs):
     n = len(flags)
     vegas = np.empty(n)
     for i, (flag, F, K, t, r, sigma) in enumerate(zip(flags, Fs, Ks, ts, rs, sigmas)):
@@ -59,7 +61,7 @@ def numerical_vega_black(flags, Fs, Ks, ts, rs, sigmas):
 
 
 @maybe_jit()
-def numerical_rho_black(flags, Fs, Ks, ts, rs, sigmas):
+def numerical_rho_black(flags, Fs, Ks, ts, rs, sigmas, bs):
     n = len(flags)
     rhos = np.empty(n)
     for i, (flag, F, K, t, r, sigma) in enumerate(zip(flags, Fs, Ks, ts, rs, sigmas)):
@@ -72,7 +74,7 @@ def numerical_rho_black(flags, Fs, Ks, ts, rs, sigmas):
 
 
 @maybe_jit()
-def numerical_gamma_black(flags, Fs, Ks, ts, rs, sigmas):
+def numerical_gamma_black(flags, Fs, Ks, ts, rs, sigmas, bs):
     n = len(flags)
     gammas = np.empty(n)
     for i, (flag, F, K, t, r, sigma) in enumerate(zip(flags, Fs, Ks, ts, rs, sigmas)):

@@ -290,7 +290,6 @@ def gamma(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as=
 
     if model == "black":
         b = 0
-        # black scholes, it calls the black_scholes function and not the black function.
         gamma = numerical_gamma_black(flag, S, K, t, r, sigma, b)
     elif model == "black_scholes":
         b = r

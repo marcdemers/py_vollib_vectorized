@@ -49,48 +49,47 @@ def _check_below_and_above_intrinsic(Ks, Fs, qs, prices, on_error):
     _max_price[qs < 0] = Ks[qs < 0]
     _max_price[qs > 0] = Fs[qs > 0]
 
-    _below_intrinsic_array, _above_max_price = [], []
+    # 始终计算违规索引, 供调用方将无效合约置 NaN; on_error 仅控制告警/抛错,
+    # 保证 warn/ignore/raise 三种模式对无效合约的输出一致(均为 NaN)
+    _below_intrinsic_array = np.argwhere(prices < _intrinsic).ravel().tolist()
+    _above_max_price = np.argwhere(prices >= _max_price).ravel().tolist()
 
-    if on_error != "ignore":
-        if np.any(prices < _intrinsic):
-            _below_intrinsic_array = np.argwhere(prices < _intrinsic).ravel().tolist()
-            if on_error == "warn":
-                warnings.warn(
-                    "Found Below Intrinsic contracts at index {}".format(_below_intrinsic_array),
-                    stacklevel=2)
-            elif on_error == "raise":
-                raise PriceIsBelowIntrinsic
-        if np.any(prices >= _max_price):
-            _above_max_price = np.argwhere(prices >= _max_price).ravel().tolist()
-            if on_error == "warn":
-                warnings.warn(
-                    "Found Above Maximum Price contracts at index {}".format(_above_max_price),
-                    stacklevel=2)
-            elif on_error == "raise":
-                raise PriceIsAboveMaximum
+    if on_error == "warn":
+        if _below_intrinsic_array:
+            warnings.warn(
+                "Found Below Intrinsic contracts at index {}".format(_below_intrinsic_array),
+                stacklevel=2)
+        if _above_max_price:
+            warnings.warn(
+                "Found Above Maximum Price contracts at index {}".format(_above_max_price),
+                stacklevel=2)
+    elif on_error == "raise":
+        if _below_intrinsic_array:
+            raise PriceIsBelowIntrinsic
+        if _above_max_price:
+            raise PriceIsAboveMaximum
 
     return _below_intrinsic_array, _above_max_price
 
 
 def _check_minus_above_float(values, on_error):
-    _below_float_min_array, _above_float_max_array = [], []
-    if on_error != "ignore":
-        if np.any(values == FLOAT_MAX):
-            _above_float_max_array = np.argwhere(values == FLOAT_MAX).ravel().tolist()
-            if on_error == "warn":
-                warnings.warn(
-                    "Found PriceAboveMaximum contracts at index {}".format(_above_float_max_array)
-                )
-            elif on_error == "raise":
-                raise PriceIsAboveMaximum()
-        elif np.any(values == MINUS_FLOAT_MAX):
-            _below_float_min_array = np.argwhere(values == MINUS_FLOAT_MAX).ravel().tolist()
-            if on_error == "warn":
-                warnings.warn(
-                    "Found PriceBelowMaximum contracts at index {}".format(_below_float_min_array)
-                )
-            elif on_error == "raise":
-                PriceIsBelowIntrinsic()
+    # 始终计算越界索引, 供调用方将无效合约置 NaN; on_error 仅控制告警/抛错
+    _above_float_max_array = np.argwhere(values == FLOAT_MAX).ravel().tolist()
+    _below_float_min_array = np.argwhere(values == MINUS_FLOAT_MAX).ravel().tolist()
+    if on_error == "warn":
+        if _above_float_max_array:
+            warnings.warn(
+                "Found PriceAboveMaximum contracts at index {}".format(_above_float_max_array)
+            )
+        if _below_float_min_array:
+            warnings.warn(
+                "Found PriceBelowMaximum contracts at index {}".format(_below_float_min_array)
+            )
+    elif on_error == "raise":
+        if _above_float_max_array:
+            raise PriceIsAboveMaximum()
+        if _below_float_min_array:
+            raise PriceIsBelowIntrinsic()
     return _below_float_min_array, _above_float_max_array
 
 def _validate_df_col(col, df):

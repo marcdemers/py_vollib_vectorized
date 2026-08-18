@@ -125,12 +125,13 @@ def price_dataframe(df, *, flag_col=None, underlying_price_col=None, strike_col=
     output_df = pd.DataFrame(index=df.index)
 
     if _px_calc:
+        # return_as="numpy": 中间量直接用数组, 避免无谓的 DataFrame 构造
         if model == "black":
-            price = vectorized_black(flag, S, K, t, r, sigma)
+            price = vectorized_black(flag, S, K, t, r, sigma, return_as="numpy")
         elif model == "black_scholes":
-            price = vectorized_black_scholes(flag, S, K, t, r, sigma)
+            price = vectorized_black_scholes(flag, S, K, t, r, sigma, return_as="numpy")
         elif model == "black_scholes_merton":
-            price = vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q)
+            price = vectorized_black_scholes_merton(flag, S, K, t, r, sigma, q, return_as="numpy")
         else:
             raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
@@ -140,6 +141,7 @@ def price_dataframe(df, *, flag_col=None, underlying_price_col=None, strike_col=
             output_df["Price"] = price
 
     if _iv_calc:
+        # return_as="numpy": sigma 以纯数组进入后续 greeks 计算, 否则 DataFrame 会漏入 numba 报错
         if model == "black":
             sigma = vectorized_implied_volatility_black(
                 price=price,
@@ -148,6 +150,7 @@ def price_dataframe(df, *, flag_col=None, underlying_price_col=None, strike_col=
                 t=t,
                 r=r,
                 flag=flag,
+                return_as="numpy",
             )
         elif model in ["black_scholes", "black_scholes_merton"]:
             sigma = vectorized_implied_volatility(
@@ -158,7 +161,8 @@ def price_dataframe(df, *, flag_col=None, underlying_price_col=None, strike_col=
                 r=r,
                 flag=flag,
                 q=q,
-                model=model
+                model=model,
+                return_as="numpy",
             )
         else:
             raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
@@ -169,7 +173,8 @@ def price_dataframe(df, *, flag_col=None, underlying_price_col=None, strike_col=
             output_df["IV"] = sigma
 
     if _greek_calc:
-        greeks = get_all_greeks(flag, S, K, t, r, sigma, q, model=model, return_as="dataframe")
+        # 数据已在上方分支完成广播与校验, 直接调核心计算, 跳过 get_all_greeks 的重复预处理
+        greeks = _all_greeks_core(flag, S, K, t, r, sigma, q, model)
 
         for col in greeks:
             if inplace:
@@ -179,6 +184,42 @@ def price_dataframe(df, *, flag_col=None, underlying_price_col=None, strike_col=
 
     if not inplace:
         return output_df
+
+
+def _all_greeks_core(flag, S, K, t, r, sigma, q, model):
+    """计算全部 Greeks 的核心逻辑。输入必须已预处理为等长 numpy 数组(调用方负责广播与校验);
+    q 仅 black_scholes_merton 使用, 非 None 时必须已与 S 等长。"""
+    if model == "black":
+        # Black-76 模型 cost of carry b=0, bs 参数为签名一致性占位, 与 greeks.py 中单希腊字母函数的 black 分支保持一致
+        b = 0
+        return {
+            "delta": numerical_delta_black(flag, S, K, t, r, sigma, b),
+            "gamma": numerical_gamma_black(flag, S, K, t, r, sigma, b),
+            "theta": numerical_theta_black(flag, S, K, t, r, sigma, b),
+            "rho": numerical_rho_black(flag, S, K, t, r, sigma, b),
+            "vega": numerical_vega_black(flag, S, K, t, r, sigma, b)
+        }
+    elif model == "black_scholes":
+        b = r
+        return {
+            "delta": numerical_delta_black_scholes(flag, S, K, t, r, sigma, b),
+            "gamma": numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b),
+            "theta": numerical_theta_black_scholes(flag, S, K, t, r, sigma, b),
+            "rho": numerical_rho_black_scholes(flag, S, K, t, r, sigma, b),
+            "vega": numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
+        }
+    elif model == "black_scholes_merton":
+        if q is None:
+            raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
+        b = r - q
+        return {
+            "delta": numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "gamma": numerical_gamma_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "theta": numerical_theta_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "rho": numerical_rho_black_scholes_merton(flag, S, K, t, r, sigma, b),
+            "vega": numerical_vega_black_scholes_merton(flag, S, K, t, r, sigma, b)
+        }
+    raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
 
 
 def get_all_greeks(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", return_as="dataframe", dtype=np.float64):
@@ -214,40 +255,12 @@ def get_all_greeks(flag, S, K, t, r, sigma, q=None, *,  model="black_scholes", r
     S, K, t, r, sigma, flag = maybe_format_data_and_broadcast(S, K, t, r, sigma, flag, dtype=dtype)
     _validate_data(flag, S, K, t, r, sigma)
 
-    if model == "black":
-        b = r - r
-        greeks = {
-            "delta": numerical_delta_black_scholes(flag, S, K, t, r, sigma, b),
-            "gamma": numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b),
-            "theta": numerical_theta_black_scholes(flag, S, K, t, r, sigma, b),
-            "rho": numerical_rho_black_scholes(flag, S, K, t, r, sigma, b),
-            "vega": numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
-        }
-    elif model == "black_scholes":
-        b = r
-        greeks = {
-            "delta": numerical_delta_black_scholes(flag, S, K, t, r, sigma, b),
-            "gamma": numerical_gamma_black_scholes(flag, S, K, t, r, sigma, b),
-            "theta": numerical_theta_black_scholes(flag, S, K, t, r, sigma, b),
-            "rho": numerical_rho_black_scholes(flag, S, K, t, r, sigma, b),
-            "vega": numerical_vega_black_scholes(flag, S, K, t, r, sigma, b)
-        }
-    elif model == "black_scholes_merton":
-        if q is None:
-            raise ValueError("Must pass a `q` to black scholes merton model (annualized continuous dividend yield).")
-        S, K, t, r, sigma, q = maybe_format_data_and_broadcast(S, K, t, r, sigma, q,
-                                                               dtype=dtype)  # recheck to make sure q matches
+    if model == "black_scholes_merton" and q is not None:
+        # 仅广播 q 对齐 S 长度, S/K/t/r/sigma 已对齐无需重做
+        q = maybe_format_data_and_broadcast(S, q, dtype=dtype)[1]
         _validate_data(r, q)
-        b = r - q
-        greeks = {
-            "delta": numerical_delta_black_scholes_merton(flag, S, K, t, r, sigma, b),
-            "gamma": numerical_gamma_black_scholes_merton(flag, S, K, t, r, sigma, b),
-            "theta": numerical_theta_black_scholes_merton(flag, S, K, t, r, sigma, b),
-            "rho": numerical_rho_black_scholes_merton(flag, S, K, t, r, sigma, b),
-            "vega": numerical_vega_black_scholes_merton(flag, S, K, t, r, sigma, b)
-        }
-    else:
-        raise ValueError("Model must be one of: `black`, `black_scholes`, `black_scholes_merton`")
+
+    greeks = _all_greeks_core(flag, S, K, t, r, sigma, q, model)
 
     if return_as == "dataframe":
         return pd.DataFrame.from_dict(greeks)

@@ -25,8 +25,12 @@ def implied_volatility_from_a_transformed_rational_guess(price, F, K, T, q):
 def implied_volatility_from_a_transformed_rational_guess_with_limited_iterations(
         prices, Fs, strikes, ttes, qs, N
 ):
-    ivs = []
+    n = len(strikes)
+    ivs = np.empty(n)
     for idx, (K, F, q, price, T) in enumerate(zip(strikes, Fs, qs, prices, ttes)):
+        if T <= 0:  # 到期/负到期合约 IV 无定义, 置 NaN 防止下方除零崩溃拖垮整批
+            ivs[idx] = np.nan
+            continue
         intrinsic = np.abs(max(K - F if q < 0 else F - K, 0.0))
 
         x = np.log(F / K)
@@ -40,7 +44,7 @@ def implied_volatility_from_a_transformed_rational_guess_with_limited_iterations
         ) / np.sqrt(
             T
         )
-        ivs.append(iv)
+        ivs[idx] = iv
     return ivs
 
 
@@ -180,7 +184,9 @@ def _unchecked_normalised_implied_volatility_from_a_transformed_rational_guess_w
         else:
             f_upper_map_h, d_f_upper_map_h_d_beta, d2_f_upper_map_h_d_beta2 = py_lets_be_rational.lets_be_rational._compute_f_upper_map_and_first_two_derivatives(
                 x, s_h)
-            if d2_f_upper_map_h_d_beta2 > -SQRT_DBL_MAX < SQRT_DBL_MAX:
+            # f 哨兵初值: d2 溢出(理论不可达)时跳过 rational_cubic, 直接走二次插值, 避免 f 未定义
+            f = -1.0
+            if -SQRT_DBL_MAX < d2_f_upper_map_h_d_beta2 < SQRT_DBL_MAX:
                 r_hh = py_lets_be_rational.lets_be_rational.convex_rational_cubic_control_parameter_to_fit_second_derivative_at_left_side(
                     b_h, b_max, f_upper_map_h, 0., d_f_upper_map_h_d_beta, -0.5, d2_f_upper_map_h_d_beta2, True)
                 f = py_lets_be_rational.lets_be_rational.rational_cubic_interpolation(beta, b_h, b_max, f_upper_map_h,

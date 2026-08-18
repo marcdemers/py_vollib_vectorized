@@ -13,7 +13,7 @@ from .models import vectorized_black, vectorized_black_scholes, vectorized_black
 __version__ = '0.1'
 
 __all__ = [
-    'price_dataframe'
+    'price_dataframe',
     'get_all_greeks',
     'vectorized_implied_volatility_black',
     'vectorized_implied_volatility',

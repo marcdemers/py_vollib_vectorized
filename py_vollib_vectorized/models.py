@@ -32,11 +32,11 @@ def vectorized_black(flag, F, K, t, r, sigma, *, return_as="dataframe", dtype=np
     array([1.53408169, 1.38409245])
     """
     flag = _preprocess_flags(flag, dtype=dtype)
-    F, K, sigma, t, flag = maybe_format_data_and_broadcast(F, K, sigma, t, flag, dtype=dtype)
-    _validate_data(F, K, sigma, t, flag)
+    F, K, sigma, t, r, flag = maybe_format_data_and_broadcast(F, K, sigma, t, r, flag, dtype=dtype)
+    _validate_data(F, K, sigma, t, r, flag)
 
     prices = _black_vectorized_call(F, K, sigma, t, flag)
-    prices = np.ascontiguousarray(prices)
+    prices = np.ascontiguousarray(prices) * np.exp(-r * t)  # 加入 deflater
 
     if return_as == "series":
         return pd.Series(prices, name="Price")

@@ -79,24 +79,34 @@ def black(F, K, sigma, T, q):
 
 
 @maybe_jit()
+def discounted_black(F, K, sigma, t, flag, r=0.0):
+    """含 deflater 的 Black 定价, 与 py_vollib.black.black() 对齐, 默认 r=0 时退化为 black（向后兼容原作者意图）
+    Aligned with py_vollib.black.black() via deflater exp(-r*t); r=0 falls back to plain black()."""
+    return black(F, K, sigma, t, flag) * np.exp(-r * t)
+
+
+@maybe_jit()
 def _black_scholes_vectorized_call(flags, Ss, Ks, ts, rs, sigmas):
-    prices = []
-    for q, S, K, t, r, sigma in zip(flags, Ss, Ks, ts, rs, sigmas):
-        prices.append(black_scholes(q, S, K, t, r, sigma))
+    n = len(flags)
+    prices = np.empty(n)
+    for i, (q, S, K, t, r, sigma) in enumerate(zip(flags, Ss, Ks, ts, rs, sigmas)):
+        prices[i] = black_scholes(q, S, K, t, r, sigma)
     return prices
 
 
 @maybe_jit()
 def _black_vectorized_call(Fs, Ks, sigmas, ts, flag):
-    prices = []
-    for F, K, sigma, T, q in zip(Fs, Ks, sigmas, ts, flag):
-        prices.append(black(F, K, sigma, T, q))
+    n = len(Fs)
+    prices = np.empty(n)
+    for i, (F, K, sigma, T, q) in enumerate(zip(Fs, Ks, sigmas, ts, flag)):
+        prices[i] = black(F, K, sigma, T, q)
     return prices
 
 
 @maybe_jit()
 def _black_scholes_merton_vectorized_call(flags, Ss, Ks, ts, rs, sigmas, qs):
-    prices = []
-    for f, S, K, t, r, sigma, q in zip(flags, Ss, Ks, ts, rs, sigmas, qs):
-        prices.append(black_scholes_merton(f, S, K, t, r, sigma, q))
+    n = len(flags)
+    prices = np.empty(n)
+    for i, (f, S, K, t, r, sigma, q) in enumerate(zip(flags, Ss, Ks, ts, rs, sigmas, qs)):
+        prices[i] = black_scholes_merton(f, S, K, t, r, sigma, q)
     return prices

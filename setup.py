@@ -1,8 +1,8 @@
 import io
 import os
-from distutils.core import setup
 
-from setuptools import find_packages
+# distutils 在 Python 3.12+ 已从标准库移除,统一改用 setuptools(官方迁移路径)
+from setuptools import find_packages, setup
 
 dir = os.path.dirname(__file__)
 
